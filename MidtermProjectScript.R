@@ -9,10 +9,12 @@ install.packages("Hmisc")
 library(funModeling) 
 library(tidyverse) 
 library(Hmisc)
+library("dplyr")
 
 trip <- read.csv("trip.csv")
 trip
 ##################################################################################
+
 # Explanatory data analysis (EDA) for trip
 trip_eda <- function(trip)
 {
@@ -34,3 +36,33 @@ trip_prof=profiling_num(trip)
 describe(trip)
 
 ##################################################################################
+
+# Filter out trips that are less than 2 mins. These are most likely cancelled trips
+
+sum(trip$duration < 120)
+
+trip1 <- trip %>%
+  filter(duration >= 120)
+
+# Identify the outliers - Duration
+
+summary(trip1)
+
+summary(trip1$duration)
+hist(trip1$duration)
+boxplot(trip1$duration)
+
+trip1q <- quantile(trip1$duration)
+trip1iqr <- IQR(trip1$duration) 
+
+upperlimit <- trip1q[4] * 1.5
+lowerlimit <- trip1q[2] * 1.5
+lowerlimit <- trip1q[2] - 172.5
+
+trip2 <- trip1 %>%
+  filter(duration < upperlimit) %>%
+  filter(duration > lowerlimit)
+summary(trip2$duration)
+
+##################################################################################
+
