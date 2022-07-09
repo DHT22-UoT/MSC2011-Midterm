@@ -15,7 +15,7 @@ trip <- read.csv("trip.csv")
 trip
 ##################################################################################
 
-# Explanatory data analysis (EDA) for trip
+### Exploratory Data Analysis: Trip data ###
 trip_eda <- function(trip)
 {
   glimpse(trip)
@@ -37,21 +37,27 @@ describe(trip)
 
 ##################################################################################
 
-# Filter out trips that are less than 2 mins. These are most likely cancelled trips
+### Data Cleaning: Trip Data ###
 
+## Duration: Filter out trips that are less than 2 mins. These are most likely cancelled trips ##
+
+  # Number of likely cancelled trips (2499 obs)
 sum(trip$duration < 120)
 
+  # Remove likely cancelled trips (left with 323840 obs)
 trip1 <- trip %>%
   filter(duration >= 120)
 
-# Identify the outliers - Duration
+
+## Duration: Identify & remove outliers ##
 
 summary(trip1)
+summary(trip1$duration) # Maximum duration: 17270400s (199.89 days)
 
-summary(trip1$duration)
 hist(trip1$duration)
 boxplot(trip1$duration)
 
+  # Remove outliers based on IQR
 trip1q <- quantile(trip1$duration)
 trip1iqr <- IQR(trip1$duration) 
 
@@ -63,6 +69,22 @@ trip2 <- trip1 %>%
   filter(duration < upperlimit) %>%
   filter(duration > lowerlimit)
 summary(trip2$duration)
+
+
+## Stations: Filter out trips with invalid stations ##
+
+# Inconsistent spelling between the trip.csv & station.csv file
+# Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
+trip2$start_station_name <- stringr::str_replace(trip2$start_station_name, "Kearny", "Kearney")
+trip2$end_station_name <- stringr::str_replace(trip2$end_station_name, "Kearny", "Kearney")
+
+  # Note from Danni: Not sure if "San Jose Civic Center" is the same as "San Jose Government Center", assumed different for now
+
+# Filter out trips where the start/end station name is not found in the station.csv
+trip3 <- trip2 %>%
+  filter(start_station_name %in% station$name) %>%
+  filter(end_station_name %in% station$name)
+  
 
 ##################################################################################
 library(lubridate)
