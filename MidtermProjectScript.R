@@ -65,4 +65,18 @@ trip2 <- trip1 %>%
 summary(trip2$duration)
 
 ##################################################################################
+library(lubridate)
+
+# adding rush hours to the dataset - highest volume of hours during weekdays
+# I tried to first make a column that would say the day of each date - like monday, tues, wed, ...
+# From this i was going to filter the weekdays only and find rush hours but for some reason only half the dataset shows the weekdays and the buttom half just say NA
+# let me know if this makes sense and if you know what I did wrong.
+
+tripst <- as.Date(trip2$start_date)
+
+tripst1 <- as.POSIXct(tripst, format = "%d/%m/%y")
+tripstartday <- wday(tripst1, label=TRUE, abbr=FALSE)
+
+trip3 <- trip2 %>%
+  mutate(trip.day = wday(tripst1, label=TRUE, abbr=FALSE))
 
