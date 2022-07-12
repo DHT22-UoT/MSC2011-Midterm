@@ -75,7 +75,7 @@ trip3 <- trip2 %>%
 
 ### Data Cleaning: Weather Data ###
 
-## Conversion to factor ##
+## Variable conversion ##
 
 weather1 <- weather %>%
   # cloud_cover
@@ -89,12 +89,13 @@ weather1 <- weather %>%
   mutate(zip_code = as.factor(zip_code)) %>%
   
   # city
-  mutate(city = as.factor(city))
-
-  #' Note from Danni: precipitation_inches is a numerical variable, but also contained "T" in some rows,
-  #' so it was treated as a categorical variable. Need to decide what to do with the "T"
-
+  mutate(city = as.factor(city)) %>%
   
+  # precipitation_inches ("T" is assumed to be trace amount, therefore is converted to 0)
+  mutate(precipitation_inches = replace(precipitation_inches, precipitation_inches == "T", 0)) %>%
+  mutate(precipitation_inches = as.numeric(as.character(precipitation_inches)))
+
+
 ## Fixing Variable Name ##
 
   # Rename the variable max_wind_Speed_mph to be consistent with the remaining variable 
@@ -113,8 +114,6 @@ which(is.na(weather1$min_visibility_miles))
 
 weather3 <- weather2 %>%
   filter(!is.na(max_visibility_miles))
-
-  # Note from Danni: remaining variables with NAs -> max_gust_speed_mph(443), events(1464)
 
 
 ## Remove outliers ##
@@ -135,15 +134,11 @@ outlier6 <- boxplot(weather3$max_wind_speed_mph)$out
 outlier7 <- boxplot(weather3$mean_wind_speed_mph)$out
   # max_gust_speed_mph
 outlier8 <- boxplot(weather3$max_gust_speed_mph)$out
-  
-
-  # Note from Danni: still need to do this part after fixing "T"
   # precipitation_inches
 outlier9 <- boxplot(weather3$precipitation_inches)$out
-
+ 
   # mean_temperature_f: no outliers removed
 boxplot(weather3$mean_temperature_f)$out
-
 
 weather4 <- weather3 %>%
   filter(!(max_temperature_f %in% outlier1)) %>%
@@ -153,7 +148,8 @@ weather4 <- weather3 %>%
   filter(!(min_visibility_miles %in% outlier5)) %>%
   filter(!(max_wind_speed_mph %in% outlier6)) %>%
   filter(!(mean_wind_speed_mph %in% outlier7)) %>%
-  filter(!(max_gust_speed_mph %in% outlier8))
+  filter(!(max_gust_speed_mph %in% outlier8)) %>%
+  filter(!(precipitation_inches %in% outlier9))
   
 
 
