@@ -91,9 +91,16 @@ weather1 <- weather %>%
   # city
   mutate(city = as.factor(city))
 
-#' Note from Danni: precipitation_inches is a numerical variable, but also contained "T" in some rows,
-#' so it was treated as a categorical variable. Need to decide what to do with the "T"
+  #' Note from Danni: precipitation_inches is a numerical variable, but also contained "T" in some rows,
+  #' so it was treated as a categorical variable. Need to decide what to do with the "T"
+
   
+## Fixing Variable Name ##
+
+  # Rename the variable max_wind_Speed_mph to be consistent with the remaining variable 
+weather2 <- weather1 %>%
+  rename("max_wind_speed_mph" = "max_wind_Speed_mph")
+
 
 ## Dealing with NAs ##
 
@@ -101,16 +108,56 @@ which(is.na(weather1$max_visibility_miles))
 which(is.na(weather1$mean_visibility_miles))
 which(is.na(weather1$min_visibility_miles))
 
-#' There are 9 observations that did not report max_visibility_miles, mean_visibility_miles, 
-#' or min_visibility_miles, therefore, these 9 observations are removed. 
+  #' There are 9 observations that did not report max_visibility_miles, mean_visibility_miles, 
+  #' or min_visibility_miles, therefore, these 9 observations are removed. 
 
-weather2 <- weather1 %>%
+weather3 <- weather2 %>%
   filter(!is.na(max_visibility_miles))
 
-# Note from Danni: remaining variables with NAs -> max_gust_speed_mph(443), events(1464)
+  # Note from Danni: remaining variables with NAs -> max_gust_speed_mph(443), events(1464)
 
 
 ## Remove outliers ##
+
+  # max_temperature_f
+outlier1 <- boxplot(weather3$max_temperature_f)$out
+  # min_temperature_f
+outlier2 <- boxplot(weather3$min_temperature_f)$out 
+  # max_visibility_miles
+outlier3 <- boxplot(weather3$max_visibility_miles)$out
+  # mean_visibility_miles
+outlier4 <- boxplot(weather3$mean_visibility_miles)$out
+  # min_visibility_miles
+outlier5 <- boxplot(weather3$min_visibility_miles)$out
+  # max_wind_speed_mph
+outlier6 <- boxplot(weather3$max_wind_speed_mph)$out
+  # mean_wind_speed_mph
+outlier7 <- boxplot(weather3$mean_wind_speed_mph)$out
+  # max_gust_speed_mph
+outlier8 <- boxplot(weather3$max_gust_speed_mph)$out
+  
+
+  # Note from Danni: still need to do this part after fixing "T"
+  # precipitation_inches
+outlier9 <- boxplot(weather3$precipitation_inches)$out
+
+  # mean_temperature_f: no outliers removed
+boxplot(weather3$mean_temperature_f)$out
+
+
+weather4 <- weather3 %>%
+  filter(!(max_temperature_f %in% outlier1)) %>%
+  filter(!(min_temperature_f %in% outlier2)) %>%
+  filter(!(max_visibility_miles %in% outlier3)) %>%
+  filter(!(mean_visibility_miles %in% outlier4)) %>%
+  filter(!(min_visibility_miles %in% outlier5)) %>%
+  filter(!(max_wind_speed_mph %in% outlier6)) %>%
+  filter(!(mean_wind_speed_mph %in% outlier7)) %>%
+  filter(!(max_gust_speed_mph %in% outlier8))
+  
+
+
+
 
 
 
