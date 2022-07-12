@@ -1,7 +1,7 @@
 #' MSC2011 Midterm Project
 #' Muhammad Musa, Danni Ma
 
-# Downloading and calling relevant packaages
+# Downloading and calling relevant packages
 install.packages("tidyverse")
 install.packages("funModeling")
 install.packages("Hmisc")
@@ -14,6 +14,7 @@ library("dplyr")
 trip <- read.csv("trip.csv")
 trip
 station <- read.csv("station.csv")
+
 ##################################################################################
 
 ### Exploratory Data Analysis: Trip data ###
