@@ -1,7 +1,9 @@
 #' MSC2011 Midterm Project
 #' Muhammad Musa, Danni Ma
 
-# Downloading and calling relevant packages
+### Set-up ###
+
+## Downloading and calling relevant packages
 install.packages("tidyverse")
 install.packages("funModeling")
 install.packages("Hmisc")
@@ -11,8 +13,8 @@ library(tidyverse)
 library(Hmisc)
 library("dplyr")
 
+## Reading csv files into dataframe
 trip <- read.csv("trip.csv")
-trip
 station <- read.csv("station.csv")
 
 ##################################################################################
@@ -53,18 +55,20 @@ summary(trip2$duration)
 
 ## Stations: Filter out trips with invalid stations ##
 
-# Inconsistent spelling between the trip.csv & station.csv file
-# Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
+  # Inconsistent spelling between the trip.csv & station.csv file
+  # Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
 trip2$start_station_name <- stringr::str_replace(trip2$start_station_name, "Kearny", "Kearney")
 trip2$end_station_name <- stringr::str_replace(trip2$end_station_name, "Kearny", "Kearney")
 
-  # Note from Danni: Not sure if "San Jose Civic Center" is the same as "San Jose Government Center", assumed different for now
-
-# Filter out trips where the start/end station name is not found in the station.csv
+  # Filter out trips where the start/end station name is not found in the station.csv
 trip3 <- trip2 %>%
   filter(start_station_name %in% station$name) %>%
   filter(end_station_name %in% station$name)
-  
+
+  #' Observation: All excluded observations were trips to/from "Broadway at Main" 
+  #' or "San Jose Government Center", which are not found in the station.csv file.
+  #' (Note: the "San Jose Government Center" station is assumed different than the 
+  #' "San Jose Civic Center" station)
 
 ##################################################################################
 
