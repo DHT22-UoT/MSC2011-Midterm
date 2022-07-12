@@ -13,6 +13,7 @@ library("dplyr")
 
 trip <- read.csv("trip.csv")
 trip
+station <- read.csv("station.csv")
 ##################################################################################
 
 ### Exploratory Data Analysis: Trip data ###
@@ -91,7 +92,7 @@ trip3 <- trip2 %>%
 ### Rush Hours Task ###
 
 library(lubridate)
-
+install.packages("tidyr")
 # adding rush hours to the dataset - highest volume of hours during weekdays
 # I tried to first make a column that would say the day of each date - like monday, tues, wed, ...
 # From this i was going to filter the weekdays only and find rush hours but for some reason only half the dataset shows the weekdays and the buttom half just say NA
@@ -111,5 +112,18 @@ trip4 <- trip3 %>%
   mutate(start_date = as.POSIXct(start_date, format="%m/%d/%Y%H:%M")) %>%
   mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE))
 
+dplyr::count(trip4, trip4$trip_day)
+
+## Subsetting the weekdays in order to find rush hours
+
+trip5 <- trip4 %>%
+  filter(trip_day == c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
+
+dplyr::count(trip5, trip5$trip_day)
+
+## In order to make a histogram, I think we need to split the start date column into date and time and then only use time to find rush hours
+
+trip5$startdate <- as.Date(trip5$start_date)
+trip5$starttime <- format(as.POSIXct(trip5$start_date), format = "%H:%M:%S")
 
 
