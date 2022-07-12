@@ -17,28 +17,6 @@ station <- read.csv("station.csv")
 
 ##################################################################################
 
-### Exploratory Data Analysis: Trip data ###
-trip_eda <- function(trip)
-{
-  glimpse(trip)
-  print(status(trip))
-  freq(trip) 
-  print(profiling_num(trip))
-  plot_num(trip)
-  describe(trip)
-}
-
-glimpse(trip)
-status(trip)
-freq(trip)
-
-plot_num(trip)
-trip_prof=profiling_num(trip)
-
-describe(trip)
-
-##################################################################################
-
 ### Data Cleaning: Trip Data ###
 
 ## Duration: Filter out trips that are less than 2 mins. These are most likely cancelled trips ##
@@ -98,15 +76,6 @@ install.packages("tidyr")
 # I tried to first make a column that would say the day of each date - like monday, tues, wed, ...
 # From this i was going to filter the weekdays only and find rush hours but for some reason only half the dataset shows the weekdays and the buttom half just say NA
 # let me know if this makes sense and if you know what I did wrong.
-
-
-# tripst <- as.Date(trip2$start_date)
-# 
-# tripst1 <- as.POSIXct(tripst, format = "%d/%m/%y")
-# tripstartday <- wday(tripst1, label=TRUE, abbr=FALSE)
-# 
-# trip3 <- trip2 %>%
-#   mutate(trip.day = wday(tripst1, label=TRUE, abbr=FALSE))
 
 ## Create new variable trip_day ##
 trip4 <- trip3 %>%
