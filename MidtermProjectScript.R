@@ -5,7 +5,7 @@
 install.packages("tidyverse")
 install.packages("funModeling")
 install.packages("Hmisc")
-
+install.packages("quantmod")
 library(funModeling) 
 library(tidyverse) 
 library(Hmisc)
@@ -126,4 +126,7 @@ dplyr::count(trip5, trip5$trip_day)
 trip5$startdate <- as.Date(trip5$start_date)
 trip5$starttime <- format(as.POSIXct(trip5$start_date), format = "%H:%M:%S")
 
-
+trip6 <- trip5 %>%
+  mutate(starthour = hour(start_date)) %>%
+  filter(trip_day == "Monday")
+hist(trip6$starthour)
