@@ -12,7 +12,7 @@ library(funModeling)
 library(tidyverse)
 library(Hmisc)
 
-weather <- read.csv("weather.csv")
+weather <- read.csv("weather.csv", na.strings = "")
 
 ## First approach to data ##
 glimpse(weather)
@@ -33,7 +33,7 @@ freq(weather, path_out = ".")
 
 # Analyzing numerical variables
 plot_num(weather)
-  # No sign of outlier: max_temperature_f, mean_temperature_f, min_temperature_f, mean_wind_speed_mph
+  # No significant sign of outlier: max_temperature_f, mean_temperature_f, min_temperature_f, mean_wind_speed_mph
   # 1 large peak, relatively symmetrical: max_visibility_miles, mean_visibility_miles
   # Potential outlier: min_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph
   # Require conversion into factor: cloud_cover, zip_code
