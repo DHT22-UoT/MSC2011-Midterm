@@ -56,8 +56,8 @@ trip1 <- trip %>%
 summary(trip1)
 summary(trip1$duration) # Maximum duration: 17270400s (199.89 days)
 
-hist(trip1$duration)
-boxplot(trip1$duration)
+hist(log10(trip1$duration))
+boxplot(log10(trip1$duration))
 
   # Remove outliers based on IQR
 trip1q <- quantile(trip1$duration)
