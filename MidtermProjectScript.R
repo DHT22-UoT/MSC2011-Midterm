@@ -14,8 +14,9 @@ library(Hmisc)
 library("dplyr")
 
 ## Reading csv files into dataframe
-trip <- read.csv("trip.csv")
+trip <- read.csv("trip.csv", na.strings = "")
 station <- read.csv("station.csv")
+weather <- read.csv("weather.csv", na.strings = "")
 
 ##################################################################################
 
@@ -72,33 +73,46 @@ trip3 <- trip2 %>%
 
 ##################################################################################
 
-### Rush Hours Task ###
+### Data Cleaning: Weather Data ###
 
-library(lubridate)
-install.packages("tidyr")
-# adding rush hours to the dataset - highest volume of hours during weekdays
-# I tried to first make a column that would say the day of each date - like monday, tues, wed, ...
-# From this i was going to filter the weekdays only and find rush hours but for some reason only half the dataset shows the weekdays and the buttom half just say NA
-# let me know if this makes sense and if you know what I did wrong.
+## Conversion to factor ##
 
-## Create new variable trip_day ##
-trip4 <- trip3 %>%
-  mutate(start_date = as.POSIXct(start_date, format="%m/%d/%Y%H:%M")) %>%
-  mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE))
+weather1 <- weather %>%
+  # cloud_cover
+  mutate(cloud_cover = as.factor(cloud_cover)) %>%
+  
+  # events (combined levels "rain" and "Rain")
+  mutate(events = replace(events, events == "rain", "Rain")) %>%
+  mutate(events = as.factor(events)) %>%
 
-dplyr::count(trip4, trip4$trip_day)
+  # zip_code
+  mutate(zip_code = as.factor(zip_code)) %>%
+  
+  # city
+  mutate(city = as.factor(city))
 
-## Subsetting the weekdays in order to find rush hours
+#' Note from Danni: precipitation_inches is a numerical variable, but also contained "T" in some rows,
+#' so it was treated as a categorical variable. Need to decide what to do with the "T"
+  
 
-trip5 <- trip4 %>%
-  filter(trip_day == c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
+## Dealing with NAs ##
 
-dplyr::count(trip5, trip5$trip_day)
+which(is.na(weather1$max_visibility_miles))
+which(is.na(weather1$mean_visibility_miles))
+which(is.na(weather1$min_visibility_miles))
 
-## In order to make a histogram, I think we need to split the start date column into date and time and then only use time to find rush hours
+#' There are 9 observations that did not report max_visibility_miles, mean_visibility_miles, 
+#' or min_visibility_miles, therefore, these 9 observations are removed. 
+
+weather2 <- weather1 %>%
+  filter(!is.na(max_visibility_miles))
+
+# Note from Danni: remaining variables with NAs -> max_gust_speed_mph(443), events(1464)
 
 
-trip6 <- trip5 %>%
-  mutate(starthour = hour(start_date)) %>%
-  filter(trip_day == "Monday")
-hist(trip6$starthour)
+## Remove outliers ##
+
+
+
+
+
