@@ -124,6 +124,7 @@ dplyr::count(trip5, trip5$trip_day)
 
 ## In order to make a histogram, I think we need to split the start date column into date and time and then only use time to find rush hours
 
+
 trip6 <- trip5 %>%
   mutate(starthour = hour(start_date)) %>%
   filter(trip_day == "Monday")
