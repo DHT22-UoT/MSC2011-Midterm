@@ -25,10 +25,10 @@ weather <- read.csv("weather.csv", na.strings = "")
 
 ## Duration: Filter out trips that are less than 2 mins. These are most likely cancelled trips ##
 
-  # Number of likely cancelled trips (2499 obs)
+# Number of likely cancelled trips (2499 obs)
 sum(trip$duration < 120)
 
-  # Remove likely cancelled trips (left with 323840 obs)
+# Remove likely cancelled trips (left with 323840 obs)
 trip1 <- trip %>%
   filter(duration >= 120)
 
@@ -41,7 +41,7 @@ summary(trip1$duration) # Maximum duration: 17270400s (199.89 days)
 hist(log10(trip1$duration))
 boxplot(log10(trip1$duration))
 
-  # Remove outliers based on IQR (Q3 + 1.5 * IQR or Q1 - 1.5 * IQR)
+# Remove outliers based on IQR (Q3 + 1.5 * IQR or Q1 - 1.5 * IQR)
 trip1q <- quantile(trip1$duration) # Q1 = 345; Q3 = 748
 trip1iqr <- IQR(trip1$duration) # IQR = 403
 
@@ -56,37 +56,37 @@ summary(trip2$duration)
 
 ## Stations: Filter out trips with invalid stations ##
 
-  # Inconsistent spelling between the trip.csv & station.csv file
-  # Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
+# Inconsistent spelling between the trip.csv & station.csv file
+# Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
 trip2$start_station_name <- stringr::str_replace(trip2$start_station_name, "Kearny", "Kearney")
 trip2$end_station_name <- stringr::str_replace(trip2$end_station_name, "Kearny", "Kearney")
 
-  # Inconsistency due to duplication 
+# Inconsistency due to duplication 
 length(unique(trip2$start_station_id)) # 70 unique start station ids
 length(unique(trip2$start_station_name)) # 72 unique start station names
 
-  # Filter out trips where the start/end station name is not found in the station.csv
+# Filter out trips where the start/end station name is not found in the station.csv
 trip3 <- trip2 %>%
   
   # Filter out trips where the start/end station id is not found in the station.csv
   filter(start_station_id %in% station$id) %>%
   filter(end_station_id %in% station$id)
-  
-  
-  #' Observation: All excluded observations were trips to/from "Broadway at Main" 
-  #' or "San Jose Government Center", which are not found in the station.csv file.
-  #' In the trip dataset, both the "San Jose Government Center" station and the 
-  #' "Santa Clara County Civic Center" station has a station id of 80. To be 
-  #' consistent with the station dataset, station id 80 corresponds to the 
-  #' "Santa Clara County Civic Center" station, and observations with "San Jose 
-  #' Government Center" station are removed
+
+
+#' Observation: All excluded observations were trips to/from "Broadway at Main" 
+#' or "San Jose Government Center", which are not found in the station.csv file.
+#' In the trip dataset, both the "San Jose Government Center" station and the 
+#' "Santa Clara County Civic Center" station has a station id of 80. To be 
+#' consistent with the station dataset, station id 80 corresponds to the 
+#' "Santa Clara County Civic Center" station, and observations with "San Jose 
+#' Government Center" station are removed
 table(trip2$start_station_name[trip2$start_station_id == "80"])
 
 ##################################################################################
 
 ### Rush Hours Task ###
-  
-  # Add rush hours to the dataset; find the hours of weekdays where the trip volume is highest
+
+# Add rush hours to the dataset; find the hours of weekdays where the trip volume is highest
 
 ## Set-up ##
 library(lubridate)
@@ -107,7 +107,7 @@ trip4 <- trip3 %>%
   # Extract time from start_date
   mutate(start_hour = hour(start_date))
 
-  # Shows the counts of weekdays
+# Shows the counts of weekdays
 dplyr::count(trip4, trip4$trip_day)
 
 
@@ -115,7 +115,7 @@ trip5 <- trip3 %>%
   # trip 5 includes weekdays and weekends
   mutate(start_date = as.POSIXct(start_date, format="%m/%d/%Y%H:%M")) %>%
   mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE))
-  
+
 
 ## GGPlots showing highest trip volume ##
 
@@ -223,13 +223,17 @@ trip_avg_utilize$AvgUtilization <- ifelse(trip_avg_utilize$`month(start_date)` =
                                             trip_avg_utilize$`month(start_date)` == "Oct"|
                                             trip_avg_utilize$`month(start_date)` == "Dec",
                                           trip_avg_utilize$totalduration/2678400, 
+                                          # Months with 31 days
                                           
                                           ifelse(trip_avg_utilize$`month(start_date)` == "Apr"|
                                                    trip_avg_utilize$`month(start_date)` == "Jun"|
                                                    trip_avg_utilize$`month(start_date)` == "Sep"|
                                                    trip_avg_utilize$`month(start_date)` == "Nov",
                                                  trip_avg_utilize$totalduration/2592000, 
+                                                 # Months with 30 days
                                                  
                                                  trip_avg_utilize$totalduration/2419200))
+                                                # February
+
 
 
