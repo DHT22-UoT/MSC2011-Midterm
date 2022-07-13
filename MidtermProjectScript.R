@@ -109,7 +109,7 @@ weather1 <- weather %>%
   mutate(precipitation_inches = as.numeric(as.character(precipitation_inches))) %>%
 
   # data
-  mutate(date = as.POSIXct(date, format="%m/%d/%Y%H:%M"))
+  mutate(date = as.POSIXct(date, format="%m/%d/%Y"))
 
 
 ## Fixing Variable Name ##
