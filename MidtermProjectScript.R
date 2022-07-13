@@ -56,7 +56,20 @@ trip5 <- trip_clean %>%
 
 ## GGPlots showing highest trip volume ##
 
+install.packages("ggpubr")
+library("ggpubr")
 # Overall rush hours for weekdays
+
+allggplots <- ggarrange(ggplot(trip4, aes(start_hour)) + geom_density(),
+                        ggplot(tripmonday, aes(start_hour)) + geom_density(),
+                        ggplot(triptuesday, aes(start_hour)) + geom_density(),
+                        ggplot(tripwed, aes(start_hour)) + geom_density(),
+                        ggplot(tripthurs, aes(start_hour)) + geom_density(),
+                        ggplot(tripfri, aes(start_hour)) + geom_density(),
+                        labels = c("A", "B", "C", "D", "E", "F"),
+                        ncol = 3, nrow = 2)
+allggplots
+
 
 ggplot(trip4, aes(start_hour)) + geom_density()
 
@@ -143,6 +156,11 @@ dplyr::count(tripweekend, tripweekend$trip_day)
 head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10)
 head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10)
 
+cbind(head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10),
+      head(dplyr::count(trip7, trip7$start_station_name, sort = T), 10))
+
+cbind(head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10),
+      head(dplyr::count(trip7, trip7$end_station_name, sort = T), 10))
 # Finding average utilization
 
 trip_avg_utilize <- trip5 %>%
