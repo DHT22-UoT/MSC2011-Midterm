@@ -58,7 +58,6 @@ trip5 <- trip_clean %>%
 
 install.packages("ggpubr")
 library("ggpubr")
-# Overall rush hours for weekdays
 
 allggplots <- ggarrange(ggplot(trip4, aes(start_hour)) + geom_density(),
                         ggplot(tripmonday, aes(start_hour)) + geom_density(),
@@ -70,8 +69,7 @@ allggplots <- ggarrange(ggplot(trip4, aes(start_hour)) + geom_density(),
                         ncol = 3, nrow = 2)
 allggplots
 
-
-ggplot(trip4, aes(start_hour)) + geom_density()
+# Overall rush hours for weekdays
 
 densityX <- density(trip4$start_hour)$x
 densityY <- density(trip4$start_hour)$y
@@ -83,8 +81,6 @@ rushhour
 
 tripmonday <- filter(trip4, trip4$trip_day == "Monday")
 
-ggplot(tripmonday, aes(start_hour)) + geom_density()
-
 densitymondayX <- density(tripmonday$start_hour)$x
 densitymondayY <- density(tripmonday$start_hour)$y
 
@@ -94,8 +90,6 @@ rushhourmonday
 # Rush hours for Tuesdays
 
 triptuesday <- filter(trip4, trip4$trip_day == "Tuesday")
-
-ggplot(triptuesday, aes(start_hour)) + geom_density()
 
 densitytuesdayX <- density(triptuesday$start_hour)$x
 densitytuesdayY <- density(triptuesday$start_hour)$y
@@ -107,8 +101,6 @@ rushhourtuesday
 
 tripwed <- filter(trip4, trip4$trip_day == "Wednesday")
 
-ggplot(tripwed, aes(start_hour)) + geom_density()
-
 densitywedX <- density(tripwed$start_hour)$x
 densitywedY <- density(tripwed$start_hour)$y
 
@@ -119,8 +111,6 @@ rushhourwed
 
 tripthurs <- filter(trip4, trip4$trip_day == "Thursday")
 
-ggplot(tripthurs, aes(start_hour)) + geom_density()
-
 densitythursX <- density(tripthurs$start_hour)$x
 densitythursY <- density(tripthurs$start_hour)$y
 
@@ -130,8 +120,6 @@ rushhourthurs
 # Rush hours for Friday
 
 tripfri <- filter(trip4, trip4$trip_day == "Friday")
-
-ggplot(tripfri, aes(start_hour)) + geom_density()
 
 densityfriX <- density(tripfri$start_hour)$x
 densityfriY <- density(tripfri$start_hour)$y
@@ -152,15 +140,17 @@ head(dplyr::count(trip7, trip7$end_station_name, sort = T), 10)
 tripweekend <- trip5 %>%
   filter(trip_day == "Saturday" | trip_day == "Sunday")
 
-dplyr::count(tripweekend, tripweekend$trip_day)
 head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10)
 head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10)
+
+# Using cbind to observe any overlap in station names on weekday rush hours and weekends
 
 cbind(head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10),
       head(dplyr::count(trip7, trip7$start_station_name, sort = T), 10))
 
 cbind(head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10),
       head(dplyr::count(trip7, trip7$end_station_name, sort = T), 10))
+
 # Finding average utilization
 
 trip_avg_utilize <- trip5 %>%
@@ -191,4 +181,4 @@ trip_avg_utilize$AvgUtilization <- ifelse(trip_avg_utilize$`month(start_date)` =
                                                 # February
 
 
-
+barplot(trip_avg_utilize$AvgUtilization, names.arg = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), main = "Average Utilization in Each Month", xlab = "Months", ylab = "Average Utilization")
