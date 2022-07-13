@@ -148,8 +148,10 @@ outlier5 <- boxplot(weather3$max_gust_speed_mph)$out
 boxplot(weather3$mean_temperature_f)$out
   # max_visibility_miles: IQR = 0
 boxplot(weather3$max_visibility_miles)$out
+IQR(weather3$max_visibility_miles, na.rm=T)
   # mean_visibility_miles: IQR = 0
 boxplot(weather3$mean_visibility_miles)$out
+IQR(weather3$mean_visibility_miles, na.rm=T)
   # min_visibility_miles
 boxplot(weather3$min_visibility_miles)$out
   # precipitation_inches
