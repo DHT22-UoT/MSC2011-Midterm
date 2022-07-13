@@ -31,7 +31,7 @@ station
 stationtrip_join <- inner_join(station, trip5, by = c("id" = "start_station_id"))
 
 # Joining stationtrip_joined & weather4 by date and city
-weather_join <- inner_join(stationtrip_joined, weather4, by = c("start_date" = "date", "city" = "city"))
+weather_join <- inner_join(stationtrip_join, weather4, by = c("start_date" = "date", "city" = "city"))
 
 # Select weather variables from the joined table
 weather_join1 <- weather_join %>%
