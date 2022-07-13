@@ -19,3 +19,22 @@ station <- read.csv("station.csv")
 weather <- read.csv("weather.csv", na.strings = "")
 
 ##################################################################################
+
+### Tables to be joined ###
+trip5 
+weather4
+station
+
+### Joining table ###
+
+# Joining station & trip5 by station id (to get city)
+stationtrip_joined <- inner_join(station, trip5, by = c("id" = "start_station_id"))
+
+# Joining stationtrip_joined & weather4 by date and city
+
+weather_join <- inner_join(stationtrip_joined, weather4, by = c("start_date" = "date", "city" = "city"))
+
+
+
+
+
