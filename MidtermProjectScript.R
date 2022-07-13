@@ -82,7 +82,6 @@ trip3 <- trip2 %>%
   #' Government Center" station are removed
 table(trip2$start_station_name[trip2$start_station_id == "80"])
 
-
 ##################################################################################
 
 ### Data Cleaning: Weather Data ###
@@ -165,5 +164,10 @@ weather4 <- weather3 %>%
   filter(!(max_gust_speed_mph %in% outlier8)) %>%
   filter(!(precipitation_inches %in% outlier9))
 
+##################################################################################
+
+## Writing the cleaned trip & weather csv.files ##
+write.csv(trip3, file = "trip_clean.csv")
+write.csv(weather4, file = "weather_clean.csv")
 
 
