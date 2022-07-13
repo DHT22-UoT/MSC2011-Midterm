@@ -22,50 +22,71 @@ weather <- read.csv("weather.csv", na.strings = "")
 
 ### Data Cleaning: Trip Data ###
 
+## Variable conversion ##
+
+trip1 <- trip %>%
+  # start_station_name & end_station_name
+  mutate(start_station_name = as.factor(start_station_name)) %>%
+  mutate(end_station_name = as.factor(end_station_name)) %>%
+  
+  # start_station_id & end_station_id
+  mutate(start_station_id = as.factor(start_station_id)) %>%
+  mutate(end_station_id = as.factor(end_station_id)) %>%
+  
+  # bike_id
+  mutate(bike_id = as.factor(bike_id)) %>%
+  
+  # subscription_type
+  mutate(subscription_type = as.factor(subscription_type)) %>%
+  
+  # zip_code
+  mutate(zip_code = as.factor(zip_code))
+
+
 ## Duration: Filter out trips that are less than 2 mins. These are most likely cancelled trips ##
 
   # Number of likely cancelled trips (2499 obs)
-sum(trip$duration < 120)
+sum(trip1$duration < 120)
 
   # Remove likely cancelled trips (left with 323840 obs)
-trip1 <- trip %>%
+trip2 <- trip1 %>%
   filter(duration >= 120)
 
 
 ## Duration: Identify & remove outliers ##
 
-summary(trip1)
-summary(trip1$duration) # Maximum duration: 17270400s (199.89 days)
+summary(trip2)
+summary(trip2$duration) # Maximum duration: 17270400s (199.89 days)
 
-hist(log10(trip1$duration))
-boxplot(log10(trip1$duration))
+hist(log10(trip2$duration))
+boxplot(log10(trip2$duration))
 
   # Remove outliers based on IQR (Q3 + 1.5 * IQR or Q1 - 1.5 * IQR)
-trip1q <- quantile(trip1$duration) # Q1 = 345; Q3 = 748
-trip1iqr <- IQR(trip1$duration) # IQR = 403
+trip2q <- quantile(trip2$duration) # Q1 = 345; Q3 = 748
+trip2iqr <- IQR(trip2$duration) # IQR = 403
 
-upperlimit <- trip1q[4] + 1.5*trip1iqr
-lowerlimit <- trip1q[2] - 1.5*trip1iqr
+upperlimit <- trip2q[4] + 1.5*trip2iqr
+lowerlimit <- trip2q[2] - 1.5*trip2iqr
 
-trip2 <- trip1 %>%
+trip3 <- trip2 %>%
   filter(duration < upperlimit) %>%
   filter(duration > lowerlimit)
-summary(trip2$duration)
+summary(trip3$duration)
 
 
 ## Stations: Filter out trips with invalid stations ##
 
   # Inconsistent spelling between the trip.csv & station.csv file
   # Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
-trip2$start_station_name <- stringr::str_replace(trip2$start_station_name, "Kearny", "Kearney")
-trip2$end_station_name <- stringr::str_replace(trip2$end_station_name, "Kearny", "Kearney")
+trip3$start_station_name <- stringr::str_replace(trip3$start_station_name, "Kearny", "Kearney")
+trip3$end_station_name <- stringr::str_replace(trip3$end_station_name, "Kearny", "Kearney")
 
   # Inconsistency due to duplication 
-length(unique(trip2$start_station_id)) # 70 unique start station ids
-length(unique(trip2$start_station_name)) # 72 unique start station names
+length(unique(trip3$start_station_id)) # 70 unique start station ids
+length(unique(trip3$start_station_name)) # 72 unique start station names
 
   # Filter out trips where the start/end station name is not found in the station.csv
-trip3 <- trip2 %>%
+trip4 <- trip3 %>%
   filter(start_station_name %in% station$name) %>%
   filter(end_station_name %in% station$name) %>%
   
@@ -80,7 +101,7 @@ trip3 <- trip2 %>%
   #' consistent with the station dataset, station id 80 corresponds to the 
   #' "Santa Clara County Civic Center" station, and observations with "San Jose 
   #' Government Center" station are removed
-table(trip2$start_station_name[trip2$start_station_id == "80"])
+table(trip3$start_station_name[trip3$start_station_id == "80"])
 
 ##################################################################################
 
@@ -107,7 +128,7 @@ weather1 <- weather %>%
   mutate(precipitation_inches = replace(precipitation_inches, precipitation_inches == "T", 0)) %>%
   mutate(precipitation_inches = as.numeric(as.character(precipitation_inches))) %>%
 
-  # data
+  # date
   mutate(date = as.POSIXct(date, format="%m/%d/%Y"))
 
 
@@ -167,7 +188,7 @@ weather4 <- weather3 %>%
 ##################################################################################
 
 ## Writing the cleaned trip & weather csv.files ##
-write.csv(trip3, file = "trip_clean.csv")
+write.csv(trip4, file = "trip_clean.csv")
 write.csv(weather4, file = "weather_clean.csv")
 
 
