@@ -92,6 +92,7 @@ table(trip2$start_station_name[trip2$start_station_id == "80"])
 library(lubridate)
 install.packages("tidyr")
 
+
 ## Data tranformation ##
 trip4 <- trip3 %>%
   # Creating new variable trip_day
@@ -109,7 +110,6 @@ trip4 <- trip3 %>%
 dplyr::count(trip4, trip4$trip_day)
 
 
-
-########
+## GGPlots showing highest trip volumn ##
 
 
