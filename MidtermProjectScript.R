@@ -1,7 +1,9 @@
 #' MSC2011 Midterm Project
 #' Muhammad Musa, Danni Ma
 
-# Downloading and calling relevant packages
+### Set-up ###
+
+## Downloading and calling relevant packages
 install.packages("tidyverse")
 install.packages("funModeling")
 install.packages("Hmisc")
@@ -11,9 +13,10 @@ library(tidyverse)
 library(Hmisc)
 library("dplyr")
 
-trip <- read.csv("trip.csv")
-trip
+## Reading csv files into dataframe
+trip <- read.csv("trip.csv", na.strings = "")
 station <- read.csv("station.csv")
+weather <- read.csv("weather.csv", na.strings = "")
 
 ##################################################################################
 
@@ -37,13 +40,12 @@ summary(trip1$duration) # Maximum duration: 17270400s (199.89 days)
 hist(log10(trip1$duration))
 boxplot(log10(trip1$duration))
 
-  # Remove outliers based on IQR
-trip1q <- quantile(trip1$duration)
-trip1iqr <- IQR(trip1$duration) 
+  # Remove outliers based on IQR (Q3 + 1.5 * IQR or Q1 - 1.5 * IQR)
+trip1q <- quantile(trip1$duration) # Q1 = 345; Q3 = 748
+trip1iqr <- IQR(trip1$duration) # IQR = 403
 
-upperlimit <- trip1q[4] * 1.5
-lowerlimit <- trip1q[2] * 1.5
-lowerlimit <- trip1q[2] - 172.5
+upperlimit <- trip1q[4] + 1.5*trip1iqr
+lowerlimit <- trip1q[2] - 1.5*trip1iqr
 
 trip2 <- trip1 %>%
   filter(duration < upperlimit) %>%
@@ -53,48 +55,61 @@ summary(trip2$duration)
 
 ## Stations: Filter out trips with invalid stations ##
 
-# Inconsistent spelling between the trip.csv & station.csv file
-# Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
+  # Inconsistent spelling between the trip.csv & station.csv file
+  # Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
 trip2$start_station_name <- stringr::str_replace(trip2$start_station_name, "Kearny", "Kearney")
 trip2$end_station_name <- stringr::str_replace(trip2$end_station_name, "Kearny", "Kearney")
 
-  # Note from Danni: Not sure if "San Jose Civic Center" is the same as "San Jose Government Center", assumed different for now
+  # Inconsistency due to duplication 
+length(unique(trip2$start_station_id)) # 70 unique start station ids
+length(unique(trip2$start_station_name)) # 72 unique start station names
 
-# Filter out trips where the start/end station name is not found in the station.csv
+  # Filter out trips where the start/end station name is not found in the station.csv
 trip3 <- trip2 %>%
   filter(start_station_name %in% station$name) %>%
-  filter(end_station_name %in% station$name)
+  filter(end_station_name %in% station$name) %>%
   
+  # Filter out trips where the start/end station id is not found in the station.csv
+  filter(start_station_id %in% station$id) %>%
+  filter(end_station_id %in% station$id)
+
+  #' Observation: All excluded observations were trips to/from "Broadway at Main" 
+  #' or "San Jose Government Center", which are not found in the station.csv file.
+  #' In the trip dataset, both the "San Jose Government Center" station and the 
+  #' "Santa Clara County Civic Center" station has a station id of 80. To be 
+  #' consistent with the station dataset, station id 80 corresponds to the 
+  #' "Santa Clara County Civic Center" station, and observations with "San Jose 
+  #' Government Center" station are removed
+table(trip2$start_station_name[trip2$start_station_id == "80"])
 
 ##################################################################################
 
 ### Rush Hours Task ###
+  
+  # Add rush hours to the dataset; find the hours of weekdays where the trip volume is highest
 
+## Set-up ##
 library(lubridate)
 install.packages("tidyr")
-# adding rush hours to the dataset - highest volume of hours during weekdays
-# I tried to first make a column that would say the day of each date - like monday, tues, wed, ...
-# From this i was going to filter the weekdays only and find rush hours but for some reason only half the dataset shows the weekdays and the buttom half just say NA
-# let me know if this makes sense and if you know what I did wrong.
 
-## Create new variable trip_day ##
+## Data tranformation ##
 trip4 <- trip3 %>%
+  # Creating new variable trip_day
   mutate(start_date = as.POSIXct(start_date, format="%m/%d/%Y%H:%M")) %>%
-  mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE))
+  mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE)) %>%
+  
+  # Subsetting the weekdays 
+  filter(trip_day != "Saturday") %>%
+  filter(trip_day != "Sunday") %>%
+  
+  # Extract time from start_date
+  mutate(start_hour = hour(start_date))
 
+  # Shows the counts of weekdays
 dplyr::count(trip4, trip4$trip_day)
 
-## Subsetting the weekdays in order to find rush hours
-
-trip5 <- trip4 %>%
-  filter(trip_day == c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"))
-
-dplyr::count(trip5, trip5$trip_day)
-
-## In order to make a histogram, I think we need to split the start date column into date and time and then only use time to find rush hours
 
 
-trip6 <- trip5 %>%
-  mutate(starthour = hour(start_date)) %>%
-  filter(trip_day == "Monday")
-hist(trip6$starthour)
+########
+
+
