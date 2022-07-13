@@ -16,7 +16,7 @@ library("dplyr")
 ## Reading csv files into dataframe
 trip <- read.csv("trip.csv", na.strings = "")
 station <- read.csv("station.csv")
-weather <- read.csv("weather.csv")
+weather <- read.csv("weather.csv", na.strings = "")
 
 ##################################################################################
 
@@ -93,8 +93,8 @@ weather1 <- weather %>%
   # cloud_cover
   mutate(cloud_cover = as.factor(cloud_cover)) %>%
   
-  # events (combined levels "rain" and "Rain")
-  mutate(events = replace(events, events == "", "No event")) %>%
+  # events (changed NA to "No event"; combined levels "rain" and "Rain")
+  mutate(events = replace(events, is.na(events), "No event")) %>%
   mutate(events = replace(events, events == "rain", "Rain")) %>%
   mutate(events = as.factor(events)) %>%
 
@@ -120,11 +120,6 @@ weather2 <- weather1 %>%
 
 
 ## Dealing with NAs ##
-
-weather1$max_visibility_miles[weather1$max_visibility_miles == ""] <- NA
-weather1$mean_visibility_miless[weather1$mean_visibility_miles == ""] <- NA
-weather1$min_visibility_miles[weather1$min_visibility_miles == ""] <- NA
-
 which(is.na(weather1$max_visibility_miles))
 which(is.na(weather1$mean_visibility_miles))
 which(is.na(weather1$min_visibility_miles))
@@ -169,13 +164,6 @@ weather4 <- weather3 %>%
   filter(!(mean_wind_speed_mph %in% outlier7)) %>%
   filter(!(max_gust_speed_mph %in% outlier8)) %>%
   filter(!(precipitation_inches %in% outlier9))
-
-
-
-
-
-
-
 
 
 
