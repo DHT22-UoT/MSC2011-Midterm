@@ -14,7 +14,7 @@ library(Hmisc)
 library("dplyr")
 
 
-## Reading csv files into dataframe
+## Reading the cleaned csv files into dataframe
 trip <- read.csv("trip.csv", na.strings = "")
 station <- read.csv("station.csv")
 weather <- read.csv("weather.csv", na.strings = "")
