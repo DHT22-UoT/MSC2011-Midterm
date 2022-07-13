@@ -135,34 +135,32 @@ weather3 <- weather2 %>%
 outlier1 <- boxplot(weather3$max_temperature_f)$out
   # min_temperature_f
 outlier2 <- boxplot(weather3$min_temperature_f)$out 
-  # max_visibility_miles
-outlier3 <- boxplot(weather3$max_visibility_miles)$out
-  # mean_visibility_miles
-outlier4 <- boxplot(weather3$mean_visibility_miles)$out
-  # min_visibility_miles
-outlier5 <- boxplot(weather3$min_visibility_miles)$out
   # max_wind_speed_mph
-outlier6 <- boxplot(weather3$max_wind_speed_mph)$out
+outlier3 <- boxplot(weather3$max_wind_speed_mph)$out
   # mean_wind_speed_mph
-outlier7 <- boxplot(weather3$mean_wind_speed_mph)$out
+outlier4 <- boxplot(weather3$mean_wind_speed_mph)$out
   # max_gust_speed_mph
-outlier8 <- boxplot(weather3$max_gust_speed_mph)$out
-  # precipitation_inches
-outlier9 <- boxplot(weather3$precipitation_inches)$out
- 
-  # mean_temperature_f: no outliers removed
+outlier5 <- boxplot(weather3$max_gust_speed_mph)$out
+
+# No outliers are removed for the following variables:
+
+  # mean_temperature_f: no outliers observed
 boxplot(weather3$mean_temperature_f)$out
+  # max_visibility_miles: IQR = 0
+boxplot(weather3$max_visibility_miles)$out
+  # mean_visibility_miles: IQR = 0
+boxplot(weather3$mean_visibility_miles)$out
+  # min_visibility_miles
+boxplot(weather3$min_visibility_miles)$out
+  # precipitation_inches
+boxplot(weather3$precipitation_inches)$out
 
 weather4 <- weather3 %>%
   filter(!(max_temperature_f %in% outlier1)) %>%
   filter(!(min_temperature_f %in% outlier2)) %>%
-  filter(!(max_visibility_miles %in% outlier3)) %>%
-  filter(!(mean_visibility_miles %in% outlier4)) %>%
-  filter(!(min_visibility_miles %in% outlier5)) %>%
-  filter(!(max_wind_speed_mph %in% outlier6)) %>%
-  filter(!(mean_wind_speed_mph %in% outlier7)) %>%
-  filter(!(max_gust_speed_mph %in% outlier8)) %>%
-  filter(!(precipitation_inches %in% outlier9))
+  filter(!(max_wind_speed_mph %in% outlier3)) %>%
+  filter(!(mean_wind_speed_mph %in% outlier4)) %>%
+  filter(!(max_gust_speed_mph %in% outlier5))
 
 ##################################################################################
 
