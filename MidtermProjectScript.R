@@ -161,11 +161,14 @@ head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10)
 
 # Using cbind to observe any overlap in station names on weekday rush hours and weekends
 
-cbind(head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10),
-      head(dplyr::count(trip7, trip7$start_station_name, sort = T), 10))
+cbind(head(dplyr::count(morning_rush, morning_rush$start_station_name, sort = T), 10),
+      head(dplyr::count(evening_rush, evening_rush$start_station_name, sort = T), 10),
+      head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10))
 
-cbind(head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10),
-      head(dplyr::count(trip7, trip7$end_station_name, sort = T), 10))
+cbind(head(dplyr::count(morning_rush, morning_rush$end_station_name, sort = T), 10),
+      head(dplyr::count(evening_rush, evening_rush$end_station_name, sort = T), 10),
+      head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10)
+)
 
 # Finding average utilization
 
