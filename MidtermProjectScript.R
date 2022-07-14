@@ -54,20 +54,7 @@ trip5 <- trip_clean %>%
   mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE))
 
 
-## GGPlots showing highest trip volume ##
-
-install.packages("ggpubr")
-library("ggpubr")
-
-allggplots <- ggarrange(ggplot(trip4, aes(start_hour)) + geom_density(),
-                        ggplot(tripmonday, aes(start_hour)) + geom_density(),
-                        ggplot(triptuesday, aes(start_hour)) + geom_density(),
-                        ggplot(tripwed, aes(start_hour)) + geom_density(),
-                        ggplot(tripthurs, aes(start_hour)) + geom_density(),
-                        ggplot(tripfri, aes(start_hour)) + geom_density(),
-                        labels = c("A", "B", "C", "D", "E", "F"),
-                        ncol = 3, nrow = 2)
-allggplots
+## Determine Rush Hour ##
 
 # Overall rush hours for weekdays
 
@@ -127,13 +114,42 @@ densityfriY <- density(tripfri$start_hour)$y
 rushhourfri <- densityfriX[which(diff(sign(diff(densityfriY)))==-2)]
 rushhourfri
 
-# Finding the 10 most frequent start and end stations during rush hours
 
-trip7 <- trip4 %>%
-  filter(start_hour == 8 | start_hour == 17)
+## GGPlots showing highest trip volume ##
 
-head(dplyr::count(trip7, trip7$start_station_name, sort = T), 10)
-head(dplyr::count(trip7, trip7$end_station_name, sort = T), 10)
+install.packages("ggpubr")
+library("ggpubr")
+
+allggplots <- ggarrange(ggplot(trip4, aes(start_hour)) + geom_density(),
+                        ggplot(tripmonday, aes(start_hour)) + geom_density(),
+                        ggplot(triptuesday, aes(start_hour)) + geom_density(),
+                        ggplot(tripwed, aes(start_hour)) + geom_density(),
+                        ggplot(tripthurs, aes(start_hour)) + geom_density(),
+                        ggplot(tripfri, aes(start_hour)) + geom_density(),
+                        labels = c("A", "B", "C", "D", "E", "F"),
+                        ncol = 3, nrow = 2)
+allggplots
+
+## Determining Frequent Station - Weekdays ##
+
+# Finding the 10 most frequent start and end stations during morning rush hours
+
+morning_rush <- trip4 %>%
+  filter(start_hour == 8)
+
+head(dplyr::count(morning_rush, morning_rush$start_station_name, sort = T), 10)
+head(dplyr::count(morning_rush, morning_rush$end_station_name, sort = T), 10)
+
+# Finding the 10 most frequent start and end stations during evening rush hours
+
+evening_rush <- trip4 %>%
+  filter(start_hour == 17)
+
+head(dplyr::count(evening_rush, evening_rush$start_station_name, sort = T), 10)
+head(dplyr::count(evening_rush, evening_rush$end_station_name, sort = T), 10)
+
+
+## Determining Frequent Station - Weekends ##
 
 # Finding the 10 most frequent start and end stations on weekends
 
@@ -182,3 +198,6 @@ trip_avg_utilize$AvgUtilization <- ifelse(trip_avg_utilize$`month(start_date)` =
 
 
 barplot(trip_avg_utilize$AvgUtilization, names.arg = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), main = "Average Utilization in Each Month", xlab = "Months", ylab = "Average Utilization")
+
+
+
