@@ -577,7 +577,66 @@ barplot(trip_avg_utilize$AvgUtilization, names.arg = c("Jan", "Feb", "Mar", "Apr
 |11|12514935|4.83|
 |12|9529052|3.56|
 
+## Relationship Between Weather & Bike Rental Patterns
+To determine the association between weather conditions and bike rental patterns, 
+the associated datasets were merged using the inner join method in order to return a
+data frame with all matched rows. First, the station dataset and the trip dataset 
+were joined by the station id, which would construct a city column within the trip 
+data. Next, the newly created data frame was joined with the weather dataset using 
+dates and cities.
 
+```{r trip_join}
+trip_clean <- read.csv("trip_clean.csv")
+station <- read.csv("station.csv")
+weather_clean <- read.csv("weather_clean.csv")
+
+### Tables to be joined ###
+trip5 <- trip_clean %>%
+  mutate(start_date = as.POSIXct(start_date, format="%m/%d/%Y%H:%M")) %>%
+  mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE))
+
+weather_clean
+station
+
+### Joining tables ###
+
+# Joining station & trip5 by station id (to get city)
+stationtrip_join <- inner_join(station, trip5, by = c("id" = "start_station_id"))
+
+  # Create a new variable to extract date from start_date in stationtrip_join 
+stationtrip_join <- stationtrip_join %>%
+  mutate(date = as.Date(start_date))
+  
+  # Convert variable "date" in weather_clean to class date for consistency
+weather_clean <- weather_clean %>%
+  mutate(date = as.Date(date))
+
+# Joining stationtrip_join & weather_clean by date and city
+weather_join <- inner_join(stationtrip_join, weather_clean, by = c("date" = "date", "city" = "city"))
+
+# Select weather variables from the joined table
+weather_join1 <- weather_join %>%
+  select(c(duration, max_temperature_f:precipitation_inches))
+
+### Correlation ###
+install.packages("corrplot")
+library("corrplot")
+
+cor_matrix <- cor(weather_join1, use="complete.obs")
+corrplot(cor_matrix, method = "circle")
+```
+
+This dataframe would contain the duration of the trips along with each weather condition, from
+which correlations can be computed. All correlation coefficients between duration and the mean of each
+weather variable are illustrated in Table 7 and a graphical representation can be found in Figure 7 of the
+Appendix.
+
+**Table 7:** Indication of the correlation coefficients for the relationship between trip duration (in seconds)
+and each weather condition.
+
+|        |Temperature|Visibility|Wind Speed|Gust Speed|
+|:------:|:---------:|:--------:|---------:|:--------:|
+|Duration|0.0024|0.0080|0.03780|0.0225|
 
 
 ## Appendix
