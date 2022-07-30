@@ -9,12 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, results = 'hide', fig.show = 'hide')
 ```
 
-### Exploratory Data Analysis: Trip & Weather datasets
+## Exploratory Data Analysis: Trip & Weather datasets
 
-Exploratory data analysis was performed to examine the distribution of data and 
-identify potential outliers before extensive analysis. 
+Exploratory data analysis was performed to examine the distribution of data and identify potential outliers before extensive analysis. 
 
-## Trip dataset 
+### Trip dataset 
 
 ```{r trip_eda}
 library(funModeling)
@@ -54,12 +53,9 @@ The Trip dataset included `r nrow(trip)` observations and `r ncol(trip)` variabl
 
 Duration was the only numerical variable of this dataset, while the remaining variables were converted into factors for analysis. The mean trip duration is 1131.96 seconds, with a high standard deviation of 30816.17 and a broad range from 60 to 17270400 seconds. The maximum duration translates to approximately 200 days, which reveals the presence of outlying values in this variable. 
 
-Variables “start station name” and “end station name” included 74 unique stations, and the
-frequency of the stations was examined. For both variables, the “San Francisco Caltrain (Townsend at 4th)” station had the highest frequency, with a frequency of 25144 (7.70%) for the start station name, and 33213 (10.18%) for the end station name (Figure 1 & 2). Similarly, the “San Jose Government Center” station had the lowest frequency for both variables, with a frequency of 23 (0.01%) as the start station, and a frequency of 22 (0.01%) as the end station.
+Variables “start station name” and “end station name” included 74 unique stations, and the frequency of the stations was examined. For both variables, the “San Francisco Caltrain (Townsend at 4th)” station had the highest frequency, with a frequency of 25144 (7.70%) for the start station name, and 33213 (10.18%) for the end station name (Figure 1 & 2). Similarly, the “San Jose Government Center” station had the lowest frequency for both variables, with a frequency of 23 (0.01%) as the start station, and a frequency of 22 (0.01%) as the end station.
 
-Variable “bike id” had 687 unique values, with a relatively uniform frequency distribution. Subscription type is a binary variable with two levels: Subscriber and Customer. As visualized by the frequency plot (Figure 4), 277763 of the consumer are subscribers (85.11%), while the remaining 48576 are customers (14.89%). 
-
-## Weather dataset
+### Weather dataset
 
 ```{r weather_eda}
 setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
@@ -117,8 +113,203 @@ The quantitative variables of this dataset are measurements of temperature, visi
 |mean_wind_speed_mph|6.11|3.05|0.50|0.46|
 |max_gust_speed_mph|22.69|9.09|0.40|4.93|
 
+## Data Cleaning & Removal of Outliers: Trip & Weather datasets
 
+Data cleaning and formatting were performed on the Trip and Weather datasets. Any outliers were removed. The final clean data were written as trip_clean.csv and weather_clean.csv and used for subsequent rush hour and correlation analysis.
 
+### Trip dataset
+
+The first step of our analysis involved data formatting and variable conversion. Variables “start_station_name”, “end_station_name”, “start_station_id”, “end_station_id”, “bike_id”, “subscription_type”, and “zip_code” were converted into factors using the mutate() and as.factor() function in R.
+
+```{r trip_conversion}
+setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
+station <- read.csv("station.csv")
+
+trip1 <- trip %>%
+  # start_station_name & end_station_name
+  mutate(start_station_name = as.factor(start_station_name)) %>%
+  mutate(end_station_name = as.factor(end_station_name)) %>%
+  
+  # start_station_id & end_station_id
+  mutate(start_station_id = as.factor(start_station_id)) %>%
+  mutate(end_station_id = as.factor(end_station_id)) %>%
+  
+  # bike_id
+  mutate(bike_id = as.factor(bike_id)) %>%
+  
+  # subscription_type
+  mutate(subscription_type = as.factor(subscription_type)) %>%
+  
+  # zip_code
+  mutate(zip_code = as.factor(zip_code))
+```
+
+Subsequently, observations that had an duration of less than 2 minutes were removed from the dataset using the filter() function, under the assumption that these are cancelled trips. 
+
+```{r trip_cancelled}
+
+  # Number of likely cancelled trips (2499 obs)
+sum(trip1$duration < 120)
+
+  # Remove likely cancelled trips (left with 323840 obs)
+trip2 <- trip1 %>%
+  filter(duration >= 120)
+```
+
+As a result, 2499 observations were removed from the dataset, leaving `r nrow(trip2)` observations for further analysis. 
+
+Considering the broad range and high variation coefficient value of the Duration variable, potential outliers were removed based on the interquartile range (IQR). 
+In this case, the upper and the lower limits were 1352.5 and -259.5, respectively. 
+
+```{r trip_outliers}
+summary(trip2)
+summary(trip2$duration) # Maximum duration: 17270400s (199.89 days)
+
+hist(log10(trip2$duration))
+boxplot(log10(trip2$duration))
+
+  # Remove outliers based on IQR (Q3 + 1.5 * IQR or Q1 - 1.5 * IQR)
+trip2q <- quantile(trip2$duration) # Q1 = 345; Q3 = 748
+trip2iqr <- IQR(trip2$duration) # IQR = 403
+
+upperlimit <- trip2q[4] + 1.5*trip2iqr
+lowerlimit <- trip2q[2] - 1.5*trip2iqr
+
+trip3 <- trip2 %>%
+  filter(duration < upperlimit) %>%
+  filter(duration > lowerlimit)
+summary(trip3$duration)
+```
+
+As a result, 24927 observations were removed from the dataset, leaving `r nrow(trip3)` observations for further analysis.
+
+Subsequent steps of data cleaning involved ensuring the consistency and validity of the stations in the Trip data, by using the station.csv file as the reference. Inconsistent spelling of station names was observed between the trip.csv and station.csv file. Specifically, the location “Kearney” was spelt as “Kearny” in the trip.csv file. All “Kearny” in the Trip data were replaced with “Kearney”. Furthermore, duplication in station id was observed. With 72 unique start station names, there were only 70 unique station ids. Therefore, trips where the start or end station name (or id) is not found in the station.csv file were removed. 
+
+```{r trip_invalidstation}
+
+  # Inconsistent spelling between the trip.csv & station.csv file
+  # Ensure consistency by replacing all "Kearny" in trip2 with "Kearney"
+trip3$start_station_name <- stringr::str_replace(trip3$start_station_name, "Kearny", "Kearney")
+trip3$end_station_name <- stringr::str_replace(trip3$end_station_name, "Kearny", "Kearney")
+
+  # Inconsistency due to duplication 
+length(unique(trip3$start_station_id)) # 70 unique start station ids
+length(unique(trip3$start_station_name)) # 72 unique start station names
+
+  # Filter out trips where the start/end station name is not found in the station.csv
+trip4 <- trip3 %>%
+  filter(start_station_name %in% station$name) %>%
+  filter(end_station_name %in% station$name) %>%
+  
+  # Filter out trips where the start/end station id is not found in the station.csv
+  filter(start_station_id %in% station$id) %>%
+  filter(end_station_id %in% station$id)
+
+  #' Observation: All excluded observations were trips to/from "Broadway at Main" 
+  #' or "San Jose Government Center", which are not found in the station.csv file.
+  #' In the trip dataset, both the "San Jose Government Center" station and the 
+  #' "Santa Clara County Civic Center" station has a station id of 80. To be 
+  #' consistent with the station dataset, station id 80 corresponds to the 
+  #' "Santa Clara County Civic Center" station, and observations with "San Jose 
+  #' Government Center" station are removed
+table(trip3$start_station_name[trip3$start_station_id == "80"])
+
+  # Writing the cleaned trip csv file
+write.csv(trip4, file = "trip_clean.csv")
+```
+
+As a result, 83 observations were removed from the dataset, which included trips to or from the “Broadway at Main” or “San Jose Government Center” stations. With a closer examination, it was observed that both the “San Jose Government Center” and the “Santa Clara County Civic Center” stations had a station id of 80 in the Trip data. To be consistent with station.csv, it was assumed that station id 80 corresponds to the “Santa Clara County Civic Center” station. Therefore, observations with the “San Jose Government Center” station were removed from the dataset. The final clean Trip data included a total of `r nrow(trip4)` observations. The cleaned data was written as
+trip_clean.csv and used for subsequent rush hour and correlation analysis.
+
+### Weather dataset
+
+The first step of our analysis involved data formatting and variable conversion. Variables “cloud_cover”, “events”, “zip_code”, and “city” were converted into factors using the mutate() and as.factor() function in R. Variable “date” was converted to the standard POSIX format using the as.POSIXct function. For the “events” variable, the levels “rain” and “Rain” were combined into a single level, while all missing values were converted to “No event”.For the “precipitation_inches” variable, “T” was assumed to be a trace amount, and was converted to 0.
+
+```{r weather_conversion}
+
+weather1 <- weather %>%
+  # cloud_cover
+  mutate(cloud_cover = as.factor(cloud_cover)) %>%
+  
+  # events (changed NA to "No event"; combined levels "rain" and "Rain")
+  mutate(events = replace(events, is.na(events), "No event")) %>%
+  mutate(events = replace(events, events == "rain", "Rain")) %>%
+  mutate(events = as.factor(events)) %>%
+
+  # zip_code
+  mutate(zip_code = as.factor(zip_code)) %>%
+  
+  # city
+  mutate(city = as.factor(city)) %>%
+  
+  # precipitation_inches ("T" is assumed to be trace amount, therefore is converted to 0)
+  mutate(precipitation_inches = replace(precipitation_inches, precipitation_inches == "T", 0)) %>%
+  mutate(precipitation_inches = as.numeric(as.character(precipitation_inches))) %>%
+
+  # date
+  mutate(date = as.POSIXct(date, format="%m/%d/%Y"))
+
+  # Rename the variable max_wind_Speed_mph to be consistent with the remaining variable 
+weather2 <- weather1 %>%
+  rename("max_wind_speed_mph" = "max_wind_Speed_mph")
+```
+
+```{r weather_na}
+which(is.na(weather1$max_visibility_miles))
+which(is.na(weather1$mean_visibility_miles))
+which(is.na(weather1$min_visibility_miles))
+
+  #' There are 9 observations that did not report max_visibility_miles,
+  #' mean_visibility_miles, or min_visibility_miles, therefore, these 9 observations
+  #' are removed. 
+
+weather3 <- weather2 %>%
+  filter(!is.na(max_visibility_miles))
+```
+
+It was previously noticed that there were 9 observations that had missing data for all three measurements of visibility (maximum, mean, and minimum) in the Weather data. Therefore, these rows were removed from the dataset, leaving a total number of `r nrow(weather3)` observations.
+
+Lastly, to address the outliers in the Weather data, the boxplot approach was implemented. It was assumed that any data point that fell beyond the extremes of the whiskers of the boxplot were outliers, and therefore were removed from the dataset. 
+
+```{r weather_outliers}
+  # max_temperature_f
+outlier1 <- boxplot(weather3$max_temperature_f)$out
+  # min_temperature_f
+outlier2 <- boxplot(weather3$min_temperature_f)$out 
+  # max_wind_speed_mph
+outlier3 <- boxplot(weather3$max_wind_speed_mph)$out
+  # mean_wind_speed_mph
+outlier4 <- boxplot(weather3$mean_wind_speed_mph)$out
+  # max_gust_speed_mph
+outlier5 <- boxplot(weather3$max_gust_speed_mph)$out
+
+# No outliers are removed for the following variables:
+
+  # mean_temperature_f: no outliers observed
+boxplot(weather3$mean_temperature_f)$out
+  # max_visibility_miles: IQR = 0
+boxplot(weather3$max_visibility_miles)$out
+IQR(weather3$max_visibility_miles, na.rm=T)
+  # mean_visibility_miles: IQR = 0
+boxplot(weather3$mean_visibility_miles)$out
+IQR(weather3$mean_visibility_miles, na.rm=T)
+  # min_visibility_miles
+boxplot(weather3$min_visibility_miles)$out
+  # precipitation_inches
+boxplot(weather3$precipitation_inches)$out
+
+weather4 <- weather3 %>%
+  filter(!(max_temperature_f %in% outlier1)) %>%
+  filter(!(min_temperature_f %in% outlier2)) %>%
+  filter(!(max_wind_speed_mph %in% outlier3)) %>%
+  filter(!(mean_wind_speed_mph %in% outlier4)) %>%
+  filter(!(max_gust_speed_mph %in% outlier5))
+  
+write.csv(weather4, file = "weather_clean.csv")
+```
+
+As a result, outliers were removed for variables max_temperature_f, min_temperature_f,
+max_wind_speed_mph, mean_wind_speed_mph, and max_gust_speed _mph. No outliers are removed for the remaining 5 variables due to the absence of outliers, zero IQR values, or limited available data. The final clean Weather data included a total of `r nrow(weather4)` observations. The cleaned data was written as weather_clean.csv and used for subsequent rush hour and correlation analysis.
 
 
 ### Appendix
@@ -129,11 +320,9 @@ The quantitative variables of this dataset are measurements of temperature, visi
 
 ![**Figure 2.** Frequency plots of variables “end station name”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/end_station_name.jpeg)
 
-![**Figure 3.** Frequency plots of variable “subscription type”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/subscription_type.jpeg)
-
 ## Exploratory descriptive analysis: Weather data
 
-![**Figure 4.** Histograms of quantitative variables measuring temperature, visibility, wind speed, and gust speed](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+![**Figure 3.** Histograms of quantitative variables measuring temperature, visibility, wind speed, and gust speed](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
 
 
 
