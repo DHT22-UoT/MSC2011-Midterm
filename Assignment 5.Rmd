@@ -565,16 +565,21 @@ barplot(trip_avg_utilize$AvgUtilization, names.arg = c("Jan", "Feb", "Mar", "Apr
 
 |Month|Total Duration (s)|Average Utilization|
 |:---:|:----------------:|:-----------------:|
-|1|Embarcadero at Sansome|Harry Bridges Plaza (Ferry Building)|
-|2|Harry Bridges Plaza (Ferry Building)|Embarcadero at Sansome|
-|3|Market at 4th|Market at 4th|
-|4|2nd at Townsend|Powell Street BART|
-|5|Embarcadero at Bryant|San Francisco Caltrain (Townsend at 4th)|
-|6|Powell Street BART|2nd at Townsend|
-|7|San Francisco Caltrain (Townsend at 4th)|Embarcadero at Bryant|
-|8|Grant Avenue at Columbus Avenue|Steuart at Market|
-|9|San Francisco Caltrain 2 (330 Townsend)|Townsend at 7th|
-|10|Market at 10th|Market at Sansome|
+|1|11670250|4.36|
+|2|8958953|3.70|
+|3|11816467|4.41|
+|4|12633978|4.87|
+|5|13817814|5.16|
+|6|14536835|5.61|
+|7|15226850|5.69|
+|8|15035810|5.61|
+|9|15493586|5.98|
+|10|16889051|6.31|
+|11|12514935|4.83|
+|12|9529052|3.56|
+
+
+
 
 ## Appendix
 
