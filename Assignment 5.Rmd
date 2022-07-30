@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, results = 'hide', fig.show = 'hide')
 ```
 
+
 ## Exploratory Data Analysis: Trip & Weather datasets
 
 Exploratory data analysis was performed to examine the distribution of data and identify potential outliers before extensive analysis. 
@@ -112,6 +113,7 @@ The quantitative variables of this dataset are measurements of temperature, visi
 |max_wind_Speed_mph|16.44|7.32|0.45|7.47|
 |mean_wind_speed_mph|6.11|3.05|0.50|0.46|
 |max_gust_speed_mph|22.69|9.09|0.40|4.93|
+
 
 ## Data Cleaning & Removal of Outliers: Trip & Weather datasets
 
@@ -312,17 +314,231 @@ As a result, outliers were removed for variables max_temperature_f, min_temperat
 max_wind_speed_mph, mean_wind_speed_mph, and max_gust_speed _mph. No outliers are removed for the remaining 5 variables due to the absence of outliers, zero IQR values, or limited available data. The final clean Weather data included a total of `r nrow(weather4)` observations. The cleaned data was written as weather_clean.csv and used for subsequent rush hour and correlation analysis.
 
 
-### Appendix
+## Rush Hour
 
-## Exploratory descriptive analysis: Trip data
+After cleaning the trip dataset, different functions were used to determine bike rental patterns for each day of the week. Using this output, frequent starting stations and ending stations were determined along with the average utilization of bikes for each month.
+
+```{r rush_hour}
+library("dplyr")
+library(lubridate)
+library("tidyr")
+
+setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
+trip_clean <- read.csv("trip_clean.csv")
+station <- read.csv("station.csv")
+weather_clean <- read.csv("weather_clean.csv")
+
+## Data tranformation ##
+trip4 <- trip_clean %>%
+  # Creating new variable trip_day
+  mutate(start_date = as.POSIXct(start_date, format="%m/%d/%Y %H:%M")) %>%
+  mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE)) %>%
+  
+  # Subsetting the weekdays 
+  filter(trip_day != "Saturday") %>%
+  filter(trip_day != "Sunday") %>%
+  
+  # Extract time from start_date
+  mutate(start_hour = hour(start_date))
+
+# Shows the counts of weekdays
+dplyr::count(trip4, trip4$trip_day)
+
+trip5 <- trip_clean %>%
+  # trip 5 includes weekdays and weekends
+  mutate(start_date = as.POSIXct(start_date, format="%m/%d/%Y%H:%M")) %>%
+  mutate(trip_day = wday(start_date, label=TRUE, abbr=FALSE))
+
+## Determine Rush Hour ##
+
+# Overall rush hours for weekdays
+
+densityX <- density(trip4$start_hour)$x
+densityY <- density(trip4$start_hour)$y
+
+rushhour <- densityX[which(diff(sign(diff(densityY)))==-2)]
+rushhour
+
+# Rush hours for Mondays
+
+tripmonday <- filter(trip4, trip4$trip_day == "Monday")
+
+densitymondayX <- density(tripmonday$start_hour)$x
+densitymondayY <- density(tripmonday$start_hour)$y
+
+rushhourmonday <- densitymondayX[which(diff(sign(diff(densitymondayY)))==-2)]
+rushhourmonday
+
+# Rush hours for Tuesdays
+
+triptuesday <- filter(trip4, trip4$trip_day == "Tuesday")
+
+densitytuesdayX <- density(triptuesday$start_hour)$x
+densitytuesdayY <- density(triptuesday$start_hour)$y
+
+rushhourtuesday <- densitytuesdayX[which(diff(sign(diff(densitytuesdayY)))==-2)]
+rushhourtuesday
+
+# Rush hours for Wednesday
+
+tripwed <- filter(trip4, trip4$trip_day == "Wednesday")
+
+densitywedX <- density(tripwed$start_hour)$x
+densitywedY <- density(tripwed$start_hour)$y
+
+rushhourwed <- densitywedX[which(diff(sign(diff(densitywedY)))==-2)]
+rushhourwed
+
+# Rush hours for Thursday
+
+tripthurs <- filter(trip4, trip4$trip_day == "Thursday")
+
+densitythursX <- density(tripthurs$start_hour)$x
+densitythursY <- density(tripthurs$start_hour)$y
+
+rushhourthurs <- densitythursX[which(diff(sign(diff(densitythursY)))==-2)]
+rushhourthurs
+
+# Rush hours for Friday
+
+tripfri <- filter(trip4, trip4$trip_day == "Friday")
+
+densityfriX <- density(tripfri$start_hour)$x
+densityfriY <- density(tripfri$start_hour)$y
+
+rushhourfri <- densityfriX[which(diff(sign(diff(densityfriY)))==-2)]
+rushhourfri
+
+## GGPlots showing highest trip volume ##
+
+install.packages("ggpubr")
+library("ggpubr")
+
+allggplots <- ggarrange(ggplot(trip4, aes(start_hour)) + geom_density(),
+                        ggplot(tripmonday, aes(start_hour)) + geom_density(),
+                        ggplot(triptuesday, aes(start_hour)) + geom_density(),
+                        ggplot(tripwed, aes(start_hour)) + geom_density(),
+                        ggplot(tripthurs, aes(start_hour)) + geom_density(),
+                        ggplot(tripfri, aes(start_hour)) + geom_density(),
+                        labels = c("A", "B", "C", "D", "E", "F"),
+                        ncol = 3, nrow = 2)
+allggplots
+```
+
+The exact peak hours for each weekday are illustrated in Table 2 and all associated ggplots are available in Figure 4 of the Appendix. As a result, these findings conclude that in the year 2014, peak bike rental hours during weekdays were 8:00 AM and 5:00 PM.
+
+**Table 2:** Indication of rush hour and the times where bike rental was the highest for each weekday.
+
+|Rush Hour AM/PM|Monday|Tuesday|Wednesday|Thursday|Friday|Weekdays|
+|:-------------:|:----:|:-----:|:-------:|:------:|:----:|:------:|
+|Rush Hour AM|7:59:14|7:59:17|7:59:11|7:59:17|7:59:15|7:56:46|
+|Rush Hour PM|4:59:02|4:58:57|4:59:07|4:58:58|4:55:59|4:57:57|
+
+Next, using the “dplyr” package, the ten most frequent start and end stations during rush hours were determined, which are illustrated in Table 3 (morning rush hour - 8:00 AM) and Table 4 (evening rush hour - 5:00 PM). Similarly, the same protocols were followed to determine the ten most frequent start and end stations on weekends, which are illustrated in Table 5.
+
+```{r frequent_station}
+## Determining Frequent Station - Weekdays ##
+
+# Finding the 10 most frequent start and end stations during morning rush hours
+
+morning_rush <- trip4 %>%
+  filter(start_hour == 8)
+
+head(dplyr::count(morning_rush, morning_rush$start_station_name, sort = T), 10)
+head(dplyr::count(morning_rush, morning_rush$end_station_name, sort = T), 10)
+
+# Finding the 10 most frequent start and end stations during evening rush hours
+
+evening_rush <- trip4 %>%
+  filter(start_hour == 17)
+
+head(dplyr::count(evening_rush, evening_rush$start_station_name, sort = T), 10)
+head(dplyr::count(evening_rush, evening_rush$end_station_name, sort = T), 10)
+
+
+## Determining Frequent Station - Weekends ##
+
+# Finding the 10 most frequent start and end stations on weekends
+
+tripweekend <- trip5 %>%
+  filter(trip_day == "Saturday" | trip_day == "Sunday")
+
+head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10)
+head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10)
+
+# Using cbind to observe any overlap in station names on weekday rush hours and weekends
+
+cbind(head(dplyr::count(morning_rush, morning_rush$start_station_name, sort = T), 10),
+      head(dplyr::count(evening_rush, evening_rush$start_station_name, sort = T), 10),
+      head(dplyr::count(tripweekend, tripweekend$start_station_name, sort = T), 10))
+
+cbind(head(dplyr::count(morning_rush, morning_rush$end_station_name, sort = T), 10),
+      head(dplyr::count(evening_rush, evening_rush$end_station_name, sort = T), 10),
+      head(dplyr::count(tripweekend, tripweekend$end_station_name, sort = T), 10))
+```
+
+**Table 3:** Indication of the ten most frequent start station and the ten most frequent end stations for each trip during morning rush hour timings (8:00 AM) on weekdays.
+
+|Rank|Start Station Name|Count|End Station Name|Count|
+|:--:|:----------------:|:---:|:--------------:|:---:|
+|1|San Francisco Caltrain (Townsend at 4th)|6070|San Francisco Caltrain (Townsend at 4th)|3228|
+|2|Harry Bridges Plaza (Ferry Building)|3426|2nd at Townsend|2404|
+|3|San Francisco Caltrain 2 (330 Townsend)|3364|Townsend at 7th|2188|
+|4|Temporary Transbay Terminal (Howard at Beale)|3110|Market at Sansome|2149|
+|5|Steuart at Market|1912|Embarcadero at Sansome|1491|
+|6|Grant Avenue at Columbus Avenue|1591|2nd at South Park|1422|
+|7|2nd at Townsend|1289|San Francisco Caltrain 2 (330 Townsend)|1400|
+|8|Embarcadero at Bryant|1120|Howard at 2nd|1386|
+|9|Civic Center BART (7th at Market)|1108|Embarcadero at Folsom|1356|
+|10|South Van Ness at Market|1001|Steuart at Market|1303|
+
+**Table 4:** Indication of the ten most frequent start station and the ten most frequent end stations for each trip during evening rush hour timings (5:00 PM) on week days.
+
+|Rank|Start Station Name|Count|End Station Name|Count|
+|:--:|:----------------:|:---:|:--------------:|:---:|
+|1|Townsend at 7th|1844|San Francisco Caltrain (Townsend at 4th)|6501|
+|2|San Francisco Caltrain (Townsend at 4th)|1778|San Francisco Caltrain 2 (330 Townsend)|3541|
+|3|2nd at Townsend|1700|Harry Bridges Plaza (Ferry Building)|2319|
+|4|Market at Sansome|1685|Temporary Transbay Terminal (Howard at Beale)|2101|
+|5|2nd at South Park|1500|Steuart at Market|1951|
+|6|Embarcadero at Sansome|1419|Market at Sansome|1448|
+|7|Steuart at Market|1334|Powell Street BART|1074|
+|8|San Francisco Caltrain 2 (330 Townsend)|1262|2nd at Townsend|1073|
+|9|Embarcadero at Folsom|1208|Civic Center BART (7th atMarket)|1047|
+|10|Commercial at Montgomery|1207|Townsend at 7th 980|
+
+**Table 5:** Indication of the ten most frequent start station and the ten most frequent end stations for each trip during weekends.
+
+|Rank|Start Station Name|End Station Name|
+|:--:|:----------------:|:--------------:|
+|1|Embarcadero at Sansome|Harry Bridges Plaza (Ferry Building)|
+|2|Harry Bridges Plaza (Ferry Building)|Embarcadero at Sansome|
+|3|Market at 4th|Market at 4th|
+|4|2nd at Townsend|Powell Street BART|
+|5|Embarcadero at Bryant|San Francisco Caltrain (Townsend at 4th)|
+|6|Powell Street BART|2nd at Townsend|
+|7|San Francisco Caltrain (Townsend at 4th)|Embarcadero at Bryant|
+|8|Grant Avenue at Columbus Avenue|Steuart at Market|
+|9|San Francisco Caltrain 2 (330 Townsend)|Townsend at 7th|
+|10|Market at 10th|Market at Sansome|
+
+
+
+
+## Appendix
+
+### Exploratory descriptive analysis: Trip data
 
 ![**Figure 1.** Frequency plots of variables “start station name”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/start_station_name.jpeg) 
 
 ![**Figure 2.** Frequency plots of variables “end station name”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/end_station_name.jpeg)
 
-## Exploratory descriptive analysis: Weather data
+### Exploratory descriptive analysis: Weather data
 
 ![**Figure 3.** Histograms of quantitative variables measuring temperature, visibility, wind speed, and gust speed](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+### Rush Hour
+
+![**Figure 4.** Series of ggplots showing bike rental patterns at different hours of the day. Graph A represents the approximate pattern of all weekdays together. Graph B to graph F represent the bike rental pattern for each week day individually, Monday to Friday, respectively](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
 
 
 
