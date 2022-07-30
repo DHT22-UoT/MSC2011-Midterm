@@ -320,9 +320,8 @@ After cleaning the trip dataset, different functions were used to determine bike
 
 ### Determining Rush Hour & Most Frequent Stations
 ```{r rush_hour}
-library("dplyr")
 library(lubridate)
-library("tidyr")
+library(tidyr)
 
 setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
 trip_clean <- read.csv("trip_clean.csv")
