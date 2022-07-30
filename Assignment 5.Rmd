@@ -594,6 +594,9 @@ barplot(trip_avg_utilize$AvgUtilization, names.arg = c("Jan", "Feb", "Mar", "Apr
 ### Rush Hour
 
 ![**Figure 4.** Series of ggplots showing bike rental patterns at different hours of the day. Graph A represents the approximate pattern of all weekdays together. Graph B to graph F represent the bike rental pattern for each week day individually, Monday to Friday, respectively](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+![**Figure 5.** Graphical representation of the average utilization for each month, in 2014](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+
+![**Figure 6.** Correlation plot representing the relationship between trip duration and different weatherconditions. Scale on the right is the reference showing the strength of the relationship](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
 
 
 
