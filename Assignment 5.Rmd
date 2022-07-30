@@ -104,8 +104,9 @@ The Weather dataset included `r nrow(weather)` observations and `r ncol(weather)
 The quantitative variables of this dataset are measurements of temperature, visibility, wind speed, gust speed, and precipitation inches. The mean, standard deviation, variation of coefficient, and the skewness of quantitative variables are summarized in Table 1. In addition, histograms are plotted to examine the distribution of the data of these variables (Figure 3).
 
 **Table 1:** Weather Characteristics
+
 |Variables|Mean|Standard Deviation|Variation Coef|Skewness|
-|:-------:|---:|:----------------:|:------------:|:------:|
+|:-------:|:--:|:----------------:|:------------:|:------:|
 |max_temperature_f|71.03|8.26|0.12|0.25|
 |mean_temperature_f|62.03|6.75|0.11|-0.15|
 |min_temperature_f|52.83|6.67|0.13|-0.48|
