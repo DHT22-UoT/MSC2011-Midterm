@@ -318,6 +318,7 @@ max_wind_speed_mph, mean_wind_speed_mph, and max_gust_speed _mph. No outliers ar
 
 After cleaning the trip dataset, different functions were used to determine bike rental patterns for each day of the week. Using this output, frequent starting stations and ending stations were determined along with the average utilization of bikes for each month.
 
+### Determining Rush Hour & Most Frequent Stations
 ```{r rush_hour}
 library("dplyr")
 library(lubridate)
@@ -455,7 +456,6 @@ evening_rush <- trip4 %>%
 head(dplyr::count(evening_rush, evening_rush$start_station_name, sort = T), 10)
 head(dplyr::count(evening_rush, evening_rush$end_station_name, sort = T), 10)
 
-
 ## Determining Frequent Station - Weekends ##
 
 # Finding the 10 most frequent start and end stations on weekends
@@ -522,8 +522,59 @@ cbind(head(dplyr::count(morning_rush, morning_rush$end_station_name, sort = T), 
 |9|San Francisco Caltrain 2 (330 Townsend)|Townsend at 7th|
 |10|Market at 10th|Market at Sansome|
 
+### Determining Average Bike Utilization 
 
 
+The dataset was grouped by months, from which the total duration of bikes used per month was summed and used to calculate average utilization per month (total time used/total time in a month). The total duration of each month along with its average utilization
+rate is illustrated in Table 6 along with a graphical representation in Figure 5 of the Appendix.
+
+```{r avg_utilization}
+trip_avg_utilize <- trip5 %>%
+  group_by(month(start_date)) %>%
+  summarise_at(vars(duration), list(totalduration = sum))
+
+trip_avg_utilize$`month(start_date)` <- month.abb[trip_avg_utilize$`month(start_date)`]
+
+
+trip_avg_utilize$AvgUtilization <- ifelse(trip_avg_utilize$`month(start_date)` == "Jan"|
+                                            trip_avg_utilize$`month(start_date)` == "Mar"|
+                                            trip_avg_utilize$`month(start_date)` == "May"|
+                                            trip_avg_utilize$`month(start_date)` == "Jul"|
+                                            trip_avg_utilize$`month(start_date)` == "Aug"|
+                                            trip_avg_utilize$`month(start_date)` == "Oct"|
+                                            trip_avg_utilize$`month(start_date)` == "Dec",
+                                          trip_avg_utilize$totalduration/2678400, 
+                                          # Months with 31 days
+                                          
+                                          ifelse(trip_avg_utilize$`month(start_date)` == "Apr"|
+                                                   trip_avg_utilize$`month(start_date)` == "Jun"|
+                                                   trip_avg_utilize$`month(start_date)` == "Sep"|
+                                                   trip_avg_utilize$`month(start_date)` == "Nov",
+                                                 trip_avg_utilize$totalduration/2592000, 
+                                                 # Months with 30 days
+                                                 
+                                                 trip_avg_utilize$totalduration/2419200))
+                                                # February
+
+
+barplot(trip_avg_utilize$AvgUtilization, names.arg = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), main = "Average Utilization in Each Month", xlab = "Months", ylab = "Average Utilization")
+
+```
+
+**Table 6:** Indication of the average utilization of bikes per month in 2014.
+
+|Month|Total Duration (s)|Average Utilization|
+|:---:|:----------------:|:-----------------:|
+|1|Embarcadero at Sansome|Harry Bridges Plaza (Ferry Building)|
+|2|Harry Bridges Plaza (Ferry Building)|Embarcadero at Sansome|
+|3|Market at 4th|Market at 4th|
+|4|2nd at Townsend|Powell Street BART|
+|5|Embarcadero at Bryant|San Francisco Caltrain (Townsend at 4th)|
+|6|Powell Street BART|2nd at Townsend|
+|7|San Francisco Caltrain (Townsend at 4th)|Embarcadero at Bryant|
+|8|Grant Avenue at Columbus Avenue|Steuart at Market|
+|9|San Francisco Caltrain 2 (330 Townsend)|Townsend at 7th|
+|10|Market at 10th|Market at Sansome|
 
 ## Appendix
 
