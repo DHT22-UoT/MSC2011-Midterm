@@ -9,22 +9,133 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, results = 'hide', fig.show = 'hide')
 ```
 
-## R Markdown
+### Exploratory Data Analysis: Trip & Weather datasets
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Exploratory data analysis was performed to examine the distribution of data and 
+identify potential outliers before extensive analysis. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Trip dataset 
 
-```{r cars}
-summary(cars)
+```{r trip_eda}
+library(funModeling)
+library(tidyverse)
+library(Hmisc)
+
+setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
+trip <- read.csv("trip.csv", na.strings = "")
+
+## First approach to data ##
+glimpse(trip) # 326339 observations & 11 variables
+
+status(trip) # zip_code has 50 zero values and 1493 missing values
+
+## Analyzing categorical variables ##
+freq(trip) #' The "San Francisco Caltrain (Townsend at 4th)" station had the highest frequency as starting station (25144) & end station (33213)
+
+freq(trip, path_out = ".")
+
+# Analyzing numerical variables
+plot_num(trip)
+  # 1 large peak: duration
+  # Negatively skewed: start_station_id, end_station_id
+  # Require conversion into factor: start_station_name, end_station_name
+
+plot_num(trip, path_out = ".")
+
+trip_prof <- profiling_num(trip)
+  # Skewness: duration (539.65)
+  # High std: duration (30816.16)
+  # High variation_coef: duration(27.22)
+
+# Analyzing categorical & numerical variables at the same time 
+describe(trip)
+```
+The Trip dataset included `r nrow(trip)` observations and `r ncol(trip)` variables of interest including id, duration, start date, start station name, start station id, end station name, end station id, bike id, subscription type, and zip code. No missing value was observed with the exception of the “zip code” variable, which had 1493 missing values. Variables “start date” and “end date” follows the format of MM/DD/YYYY along with the time (H:M), which required conversion to the POSIX format to ensure consistency across datasets.
+
+Duration was the only numerical variable of this dataset, while the remaining variables were converted into factors for analysis. The mean trip duration is 1131.96 seconds, with a high standard deviation of 30816.17 and a broad range from 60 to 17270400 seconds. The maximum duration translates to approximately 200 days, which reveals the presence of outlying values in this variable. 
+
+Variables “start station name” and “end station name” included 74 unique stations, and the
+frequency of the stations was examined. For both variables, the “San Francisco Caltrain (Townsend at 4th)” station had the highest frequency, with a frequency of 25144 (7.70%) for the start station name, and 33213 (10.18%) for the end station name (Figure 1 & 2). Similarly, the “San Jose Government Center” station had the lowest frequency for both variables, with a frequency of 23 (0.01%) as the start station, and a frequency of 22 (0.01%) as the end station.
+
+Variable “bike id” had 687 unique values, with a relatively uniform frequency distribution. Subscription type is a binary variable with two levels: Subscriber and Customer. As visualized by the frequency plot (Figure 4), 277763 of the consumer are subscribers (85.11%), while the remaining 48576 are customers (14.89%). 
+
+## Weather dataset
+
+```{r weather_eda}
+setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
+weather <- read.csv("weather.csv", na.strings = "")
+
+## First approach to data ##
+glimpse(weather) # 1825 observations & 15 variables
+
+status(weather)
+  # max_gust_speed_mph has 451 missing values
+  # precipitation_inches has 1543 zero values 
+  # cloud_cover, events, zip_code, and city are categorical variables (require conversion into factors)
+
+## Analyzing categorical variables ##
+freq(weather)
+  # precipitation_inches: most observations (1543) have 0 inch precipitation, 73 has "T", numerical data treated as categorical
+  # events: most observations (1473) have NAs; level "rain" can be combined with level "Rain"
+  # city: all 5 cities have the same frequency
+
+freq(weather, path_out = ".")
+
+# Analyzing numerical variables
+plot_num(weather)
+  # No significant sign of outlier: max_temperature_f, mean_temperature_f, min_temperature_f, mean_wind_speed_mph
+  # 1 large peak, relatively symmetrical: max_visibility_miles, mean_visibility_miles
+  # Potential outlier: min_visibility_miles, max_wind_Speed_mph, max_gust_speed_mph
+  # Require conversion into factor: cloud_cover, zip_code
+
+plot_num(weather, path_out = ".")
+
+weather_prof <- profiling_num(weather)
+  # Skewness: max_wind_Speed_mph (7.47), max_gust_speed_mph (4.93), max_visibility_miles (2.88)
+  # High std: max_gust_speed_mph (9.09), max_temperature_f (8.26), max_wind_Speed_mph (7.32)
+  # High variation_coef: mean_wind_speed_mph (0.50), max_wind_Speed_mph (0.45), max_gust_speed_mph (0.40)
+
+# Analyzing categorical & numerical variables at the same time 
+describe(weather)
 ```
 
-## Including Plots
+The Weather dataset included `r nrow(weather)` observations and `r ncol(weather)` variables of interest including date, max_temperature_f, mean_temperature_f, min_temperature_f, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, zip_code, and city.
 
-You can also embed plots, for example:
+The quantitative variables of this dataset are measurements of temperature, visibility, wind speed, gust speed, and precipitation inches. The mean, standard deviation, variation of coefficient, and the skewness of quantitative variables are summarized in Table 1. In addition, histograms are plotted to examine the distribution of the data of these variables (Figure 3).
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+**Table 1:** Weather Characteristics
+|Variables|Mean|Standard Deviation|Variation Coef|Skewness|
+|:-------:|---:|:----------------:|:------------:|:------:|
+|max_temperature_f|71.03|8.26|0.12|0.25|
+|mean_temperature_f|62.03|6.75|0.11|-0.15|
+|min_temperature_f|52.83|6.67|0.13|-0.48|
+|max_visibility_miles|10.86|2.62|0.24|2.89|
+|mean_visibility_miles|9.97|1.62|0.16|1.78|
+|min_visibility_miles|8.11|3.04|0.37|-1.03|
+|max_wind_Speed_mph|16.44|7.32|0.45|7.47|
+|mean_wind_speed_mph|6.11|3.05|0.50|0.46|
+|max_gust_speed_mph|22.69|9.09|0.40|4.93|
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+### Appendix
+
+## Exploratory descriptive analysis: Trip data
+
+![**Figure 1.** Frequency plots of variables “start station name”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/start_station_name.jpeg) 
+
+![**Figure 2.** Frequency plots of variables “end station name”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/end_station_name.jpeg)
+
+![**Figure 3.** Frequency plots of variable “subscription type”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/subscription_type.jpeg)
+
+## Exploratory descriptive analysis: Weather data
+
+![**Figure 4.** Histograms of quantitative variables measuring temperature, visibility, wind speed, and gust speed](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+
+
+
+
+
+
