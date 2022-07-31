@@ -9,7 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, results = 'hide', fig.show = 'hide')
 ```
 
-
 ## Exploratory Data Analysis: Trip & Weather datasets
 
 Exploratory data analysis was performed to examine the distribution of data and identify potential outliers before extensive analysis. 
@@ -314,6 +313,7 @@ max_wind_speed_mph, mean_wind_speed_mph, and max_gust_speed _mph. No outliers ar
 After cleaning the datasets, different functions were used to determine bike rental patterns for each day of the week. Using this output, frequent starting stations and ending stations were determined along with the average utilization of bikes for each month.
 
 ### Determining Rush Hour & Most Frequent Stations
+
 ```{r rush_hour}
 library(lubridate)
 library(tidyr)
@@ -570,7 +570,9 @@ barplot(trip_avg_utilize$AvgUtilization, names.arg = c("Jan", "Feb", "Mar", "Apr
 |11|12514935|4.83|
 |12|9529052|3.56|
 
+
 ## Relationship Between Weather & Bike Rental Patterns
+
 To determine the association between weather conditions and bike rental patterns, 
 the associated datasets were merged using the inner join method in order to return a
 data frame with all matched rows. First, the station dataset and the trip dataset 
@@ -644,6 +646,7 @@ and each weather condition.
 ### Rush Hour
 
 ![**Figure 4.** Series of ggplots showing bike rental patterns at different hours of the day. Graph A represents the approximate pattern of all weekdays together. Graph B to graph F represent the bike rental pattern for each week day individually, Monday to Friday, respectively](ggplots.png)
+
 ![**Figure 5.** Graphical representation of the average utilization for each month, in 2014](avg_utilization.png)
 
 ![**Figure 6.** Correlation plot representing the relationship between trip duration and different weatherconditions. Scale on the right is the reference showing the strength of the relationship](corplot.png)
