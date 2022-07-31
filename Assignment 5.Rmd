@@ -21,7 +21,6 @@ library(funModeling)
 library(tidyverse)
 library(Hmisc)
 
-setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
 trip <- read.csv("trip.csv", na.strings = "")
 
 ## First approach to data ##
@@ -59,7 +58,6 @@ Variables “start station name” and “end station name” included 74 unique
 ### Weather dataset
 
 ```{r weather_eda}
-setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
 weather <- read.csv("weather.csv", na.strings = "")
 
 ## First approach to data ##
@@ -117,14 +115,13 @@ The quantitative variables of this dataset are measurements of temperature, visi
 
 ## Data Cleaning & Removal of Outliers: Trip & Weather datasets
 
-Data cleaning and formatting were performed on the Trip and Weather datasets. Any outliers were removed. The final clean data were written as trip_clean.csv and weather_clean.csv and used for subsequent rush hour and correlation analysis.
+Data cleaning and formatting were performed on the Trip and Weather datasets. Any outliers were removed. The final cleaned data were written as trip_clean.csv and weather_clean.csv and used for subsequent rush hour and correlation analysis.
 
 ### Trip dataset
 
 The first step of our analysis involved data formatting and variable conversion. Variables “start_station_name”, “end_station_name”, “start_station_id”, “end_station_id”, “bike_id”, “subscription_type”, and “zip_code” were converted into factors using the mutate() and as.factor() function in R.
 
 ```{r trip_conversion}
-setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
 station <- read.csv("station.csv")
 
 trip1 <- trip %>%
@@ -160,8 +157,7 @@ trip2 <- trip1 %>%
 
 As a result, 2499 observations were removed from the dataset, leaving `r nrow(trip2)` observations for further analysis. 
 
-Considering the broad range and high variation coefficient value of the Duration variable, potential outliers were removed based on the interquartile range (IQR). 
-In this case, the upper and the lower limits were 1352.5 and -259.5, respectively. 
+Considering the broad range and high variation coefficient value of the Duration variable, potential outliers were removed based on the interquartile range (IQR). In this case, the upper and the lower limits were 1352.5 and -259.5, respectively. 
 
 ```{r trip_outliers}
 summary(trip2)
@@ -220,8 +216,7 @@ table(trip3$start_station_name[trip3$start_station_id == "80"])
 write.csv(trip4, file = "trip_clean.csv")
 ```
 
-As a result, 83 observations were removed from the dataset, which included trips to or from the “Broadway at Main” or “San Jose Government Center” stations. With a closer examination, it was observed that both the “San Jose Government Center” and the “Santa Clara County Civic Center” stations had a station id of 80 in the Trip data. To be consistent with station.csv, it was assumed that station id 80 corresponds to the “Santa Clara County Civic Center” station. Therefore, observations with the “San Jose Government Center” station were removed from the dataset. The final clean Trip data included a total of `r nrow(trip4)` observations. The cleaned data was written as
-trip_clean.csv and used for subsequent rush hour and correlation analysis.
+As a result, 83 observations were removed from the dataset, which included trips to or from the “Broadway at Main” or “San Jose Government Center” stations. With a closer examination, it was observed that both the “San Jose Government Center” and the “Santa Clara County Civic Center” stations had a station id of 80 in the Trip data. To be consistent with station.csv, it was assumed that station id 80 corresponds to the “Santa Clara County Civic Center” station. Therefore, observations with the “San Jose Government Center” station were removed from the dataset. The final clean Trip data included a total of `r nrow(trip4)` observations. The cleaned data was written as trip_clean.csv and used for subsequent rush hour and correlation analysis.
 
 ### Weather dataset
 
@@ -316,16 +311,15 @@ max_wind_speed_mph, mean_wind_speed_mph, and max_gust_speed _mph. No outliers ar
 
 ## Rush Hour
 
-After cleaning the trip dataset, different functions were used to determine bike rental patterns for each day of the week. Using this output, frequent starting stations and ending stations were determined along with the average utilization of bikes for each month.
+After cleaning the datasets, different functions were used to determine bike rental patterns for each day of the week. Using this output, frequent starting stations and ending stations were determined along with the average utilization of bikes for each month.
 
 ### Determining Rush Hour & Most Frequent Stations
 ```{r rush_hour}
 library(lubridate)
 library(tidyr)
 
-setwd("/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/")
-trip_clean <- read.csv("trip_clean.csv")
 station <- read.csv("station.csv")
+trip_clean <- read.csv("trip_clean.csv")
 weather_clean <- read.csv("weather_clean.csv")
 
 ## Data tranformation ##
@@ -521,11 +515,10 @@ cbind(head(dplyr::count(morning_rush, morning_rush$end_station_name, sort = T), 
 |9|San Francisco Caltrain 2 (330 Townsend)|Townsend at 7th|
 |10|Market at 10th|Market at Sansome|
 
+
 ### Determining Average Bike Utilization 
 
-
-The dataset was grouped by months, from which the total duration of bikes used per month was summed and used to calculate average utilization per month (total time used/total time in a month). The total duration of each month along with its average utilization
-rate is illustrated in Table 6 along with a graphical representation in Figure 5 of the Appendix.
+The dataset was grouped by months, from which the total duration of bikes used per month was summed and used to calculate average utilization per month (total time used/total time in a month). The total duration of each month along with its average utilization rate is illustrated in Table 6 along with a graphical representation in Figure 5 of the Appendix.
 
 ```{r avg_utilization}
 trip_avg_utilize <- trip5 %>%
@@ -626,10 +619,7 @@ cor_matrix <- cor(weather_join1, use="complete.obs")
 corrplot(cor_matrix, method = "circle")
 ```
 
-This dataframe would contain the duration of the trips along with each weather condition, from
-which correlations can be computed. All correlation coefficients between duration and the mean of each
-weather variable are illustrated in Table 7 and a graphical representation can be found in Figure 7 of the
-Appendix.
+This dataframe would contain the duration of the trips along with each weather condition, from which correlations can be computed. All correlation coefficients between duration and the mean of each weather variable are illustrated in Table 7 and a graphical representation can be found in Figure 7 of the Appendix.
 
 **Table 7:** Indication of the correlation coefficients for the relationship between trip duration (in seconds)
 and each weather condition.
@@ -643,19 +633,20 @@ and each weather condition.
 
 ### Exploratory descriptive analysis: Trip data
 
-![**Figure 1.** Frequency plots of variables “start station name”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/start_station_name.jpeg) 
+![**Figure 1.** Frequency plots of variables “start station name”](start_station_name.jpeg) 
 
-![**Figure 2.** Frequency plots of variables “end station name”](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/end_station_name.jpeg)
+![**Figure 2.** Frequency plots of variables “end station name”](end_station_name.jpeg)
 
 ### Exploratory descriptive analysis: Weather data
 
-![**Figure 3.** Histograms of quantitative variables measuring temperature, visibility, wind speed, and gust speed](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+![**Figure 3.** Histograms of quantitative variables measuring temperature, visibility, wind speed, and gust speed](histograms.png)
+
 ### Rush Hour
 
-![**Figure 4.** Series of ggplots showing bike rental patterns at different hours of the day. Graph A represents the approximate pattern of all weekdays together. Graph B to graph F represent the bike rental pattern for each week day individually, Monday to Friday, respectively](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
-![**Figure 5.** Graphical representation of the average utilization for each month, in 2014](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+![**Figure 4.** Series of ggplots showing bike rental patterns at different hours of the day. Graph A represents the approximate pattern of all weekdays together. Graph B to graph F represent the bike rental pattern for each week day individually, Monday to Friday, respectively](ggplots.png)
+![**Figure 5.** Graphical representation of the average utilization for each month, in 2014](avg_utilization.png)
 
-![**Figure 6.** Correlation plot representing the relationship between trip duration and different weatherconditions. Scale on the right is the reference showing the strength of the relationship](/Users/dannima/Desktop/MBiotech/MSC2011/Midterm/babs/histograms.png)
+![**Figure 6.** Correlation plot representing the relationship between trip duration and different weatherconditions. Scale on the right is the reference showing the strength of the relationship](corplot.png)
 
 
 
