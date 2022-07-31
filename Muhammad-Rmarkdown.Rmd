@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, results = '
 
 ## Exploratory Descriptive Analysis: 
 
+
 #### Trip Data
 
 ```{r trip_eda, include=FALSE}
@@ -47,6 +48,7 @@ Variables “start station name” and “end station name” included 74 unique
 Variables “start station id” and “end station id” included 70 unique ids. As each unique id should correspond to a unique station, the discrepancy in the number of levels observed between station and id suggests the presence of duplicates, which is addressed in the data cleaning step of the analysis. In terms of the summarized frequency, “id 70” had the highest frequency for both the “start station id” and  “end station id” variables - it had a frequency of 25144 (7.70%) and 33213 (10.18%) for start and end station id, respectively (Figure 3). The frequencies are consistent with the station names frequencies, as “id 70” corresponds to the “San Jose Government Center” station. On the other hand, “id 26” had the lowest frequency of 76 (0.02%) for the start station id, while “id 25” had the lowest frequency of 112 (0.03%) for the end station id. 
 
 Variable “bike id” had 687 unique values, with a relatively uniform frequency distribution. Subscription type is a binary variable with two levels: Subscriber and Customer. As visualized by the frequency plot (Figure 4), 277763 of the consumer are subscribers (85.11%), while the remaining 48576 are customers (14.89%). Variable “zip code” had 4887 unique values. However, 50 zero values and 1493 missing values were also observed. The zip code “94107” had the highest frequency of 36061 (11.05%).
+
 
 #### Weather Data
 
@@ -113,6 +115,7 @@ City is a categorical variable with 5 levels: San Jose, San Francisco, Redwood C
 
 
 ## Analysis
+
 
 #### Trip Data: Data Cleaning & Removal of Outliers
 
@@ -197,6 +200,7 @@ Subsequent steps of data cleaning involved ensuring the consistency and validity
 
 The final clean Trip data included a total of 298830 observations. The cleaned data was written as trip_clean.csv and used for subsequent rush hour and correlation analysis. 
 
+
 #### Weather Data: Data Cleaning & Removal of Outliers
 
 ```{r weather_conversion, include=FALSE}
@@ -276,6 +280,7 @@ It was previously noticed that there were 9 observations that had missing data f
 Lastly, to address the outliers in the Weather data, the boxplot approach was implemented. It was assumed that any data point that fell beyond the extremes of the whiskers of the boxplot were outliers, and therefore were removed from the dataset. This was achieved using the boxplot()$out to extract outlying values of each variable of interest, which were stored separately as vectors. The filter() function was then combined with %in% to remove any values that were seen in the outlier vector of the corresponding variable. As a result, outliers were removed for variables max_temperature_f, min_temperature_f, max_wind_speed_mph, mean_wind_speed_mph, and max_gust_speed _mph. No outliers are removed for the remaining 5 variables due to the absence of outliers, zero IQR values, or limited available data. 
 
 The final clean Weather data included a total of 1737 observations. The cleaned data was written as weather_clean.csv and used for subsequent rush hour and correlation analysis. 
+
 
 #### Rush Hour & Average Bike Utilization
 
@@ -487,6 +492,7 @@ In addition, to make maintenance operations more efficient, the average utilizat
 |November|12514935|4.83|
 |December|9529052|3.56|
 
+
 #### Relationship Between Weather & Bike Rental Patterns
 
 ```{r trip_join, include=FALSE}
@@ -535,21 +541,29 @@ and each weather condition.
 
 ## Appendix
 
+
 #### Exploratory descriptive analysis: Trip data
+
 
 ![**Figure 1.** Frequency plots of variables “start station name”](start_station_name.jpeg) 
 
 ![**Figure 2.** Frequency plots of variables “end station name”](end_station_name.jpeg)
 
+
 #### Exploratory descriptive analysis: Weather data
+
 
 ![**Figure 3.** Histograms of quantitative variables measuring temperature, visibility, wind speed, and gust speed](histograms.png)
 
+
 #### Rush Hour
+
 
 ![**Figure 4.** Series of ggplots showing bike rental patterns at different hours of the day. Graph A represents the approximate pattern of all weekdays together. Graph B to graph F represent the bike rental pattern for each week day individually, Monday to Friday, respectively](ggplots_weekdays.png)
 
+
 ![**Figure 5.** Graphical representation of the average utilization for each month, in 2014](avg_util_months.png)
+
 
 ![**Figure 6:** Correlation plot representing the relationship between trip duration and different weatherconditions. Scale on the right is the reference showing the strength of the relationship](Corrplot_jointable.png)
 
